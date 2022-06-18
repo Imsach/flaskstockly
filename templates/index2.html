@@ -1,0 +1,50 @@
+{% extends "base2.html" %}
+
+{% block content %}
+
+<h4><p style="text-align:center"> - <a href="/run" target="_blank"><b>=RUN=</b></a> - Needs ONE click run unless code is interrupted somehow. [ Runs python code to pull all stock data from Api ] </p></h4>
+<h4><p style="text-align:center">Script output - <a href="/view"><b>=View Dashboard=</b></a> - after run [ Every 13 seconds ( Api allows 5 requests/min for free) it adds Random $tock from SPY500 list ]</p></h4>
+<h4><p style="text-align:center">Stocks in table: {% print(df.shape[0]) %} out of SPY500. [ Plus, manually entered stocks at <b>'/anystock'</b> ex. http://192.168.0.100/GME ]</p></h4>
+<meta http-equiv="refresh" content="100; URL=/view">
+
+
+  <table>
+    <thead>
+
+      <tr>
+        {% for col in column_names %}
+        <th>
+        
+          {{col}}
+         
+        </th>
+        {% endfor %}
+      </tr>
+
+    </thead>
+    <tbody>
+      {% for row in row_data %}
+      <tr>
+        {% for col, row_ in zip(column_names, row) %}
+
+        <td>{{ row_ }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+
+
+    </tbody>
+
+  </table>
+
+  {% block scripts %}
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+</head><body><script type="text/javascript">$(document).ready(function(){$('table').DataTable({
+    "pageLength": 20
+});});</script>
+
+    {% endblock %}
+{% endblock %}
