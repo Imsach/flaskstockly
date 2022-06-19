@@ -14,3 +14,6 @@ Now, Searching stock 'GME' here: (you can add stocks by going to http://IP/stock
 ![alt text](https://github.com/Imsach/flaskstockly/blob/066e05268c6dd5ffa6416982414f845cde01a96d/screenshots/search.PNG)
 
 
+The main page is just basic links and information for use:
+
+![alt text](https://github.com/Imsach/flaskstockly/blob/c38c3cc5d599ad02de51aba01c6ea86f1b0130af/screenshots/1indexmain.PNG)
