@@ -7,7 +7,12 @@ The API for this project is alphavantage. The documentaion API: https://www.alph
 We can add more API queries but since we are allowed 5 requests per minute for free API; slowly but surely you can gather data that way.
 To add more queries using documentation mentioned earlier; one can add more data and dataframes later to combine.
 
+BASH command line needed to initiate the app
 
+```bash
+python -m pip install -r requirements.txt
+py main.py
+```
 
 
 Single click on 'RUN' will start getting data from API. 
