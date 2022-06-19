@@ -14,13 +14,6 @@ Single click on 'RUN' will start getting data from API.
 
 Click on 'View Dashboard' shows stocks data if any gathered. (click on 'RUN' again if no data shown) 
 
-
-
-Now, Searching stock 'GME' here: (you can add stocks by going to http://YourIP:80/stockname
-
-![alt text](https://github.com/Imsach/flaskstockly/blob/066e05268c6dd5ffa6416982414f845cde01a96d/screenshots/search.PNG)
-
-
 The main page is just basic links and information for use:
 
 ![alt text](https://github.com/Imsach/flaskstockly/blob/c38c3cc5d599ad02de51aba01c6ea86f1b0130af/screenshots/1indexmain.PNG)
@@ -32,6 +25,11 @@ Single click on RUN would slowly generate searchable dataframe with functionalit
 Stocks can be added by input:
 
 ![alt text](https://github.com/Imsach/flaskstockly/blob/46f7954f375ba47dd6a86e6308ae7c8050874ab1/screenshots/addstock.PNG)
+
+Now, Searching stock 'GME' here: (you can add stocks by going to http://YourIP:80/stockname
+
+![alt text](https://github.com/Imsach/flaskstockly/blob/066e05268c6dd5ffa6416982414f845cde01a96d/screenshots/search.PNG)
+
 
 Cheers!!
 
