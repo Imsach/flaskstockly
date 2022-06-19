@@ -14,7 +14,7 @@ Click on 'View Dashboard' shows stocks data if any gathered. (click on 'RUN' aga
 
 
 
-Now, Searching stock 'GME' here: (you can add stocks by going to http://IP/stockname
+Now, Searching stock 'GME' here: (you can add stocks by going to http://YourIP:80/stockname
 
 ![alt text](https://github.com/Imsach/flaskstockly/blob/066e05268c6dd5ffa6416982414f845cde01a96d/screenshots/search.PNG)
 
