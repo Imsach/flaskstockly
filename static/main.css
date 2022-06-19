@@ -36,9 +36,7 @@ footer {
    width:100%;
    background: aliceblue;
 }
-/*
-body {background-color: #EEEEEE;}
-*/
+
 
 body {
 	background: linear-gradient(-45deg, #d8a1a1, #d5ce47, #cba361, #746b64);
@@ -47,7 +45,7 @@ body {
 }
 
 .wrapper {
-    height: 100vh;
+    height:100%;
     
     display: grid;
     place-items: center;
@@ -55,7 +53,7 @@ body {
   
   .typing {
     width: 141ch;
-    animation: typing 3s steps(30, end), blink .5s step-end infinite alternate;
+    animation: typing 2.5s steps(30, end), blink .5s step-end infinite alternate;
     white-space: nowrap;
     overflow: hidden;
     border-right: 15px solid;
