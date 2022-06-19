@@ -36,10 +36,42 @@ footer {
    width:100%;
    background: aliceblue;
 }
-
+/*
 body {background-color: #EEEEEE;}
+*/
 
+body {
+	background: linear-gradient(-45deg, #d8a1a1, #d5ce47, #cba361, #746b64);
+	background-size: 400% 400%;
+	animation: gradient 15s ease infinite;
+}
 
-/* div.container {
-        page-break-inside:avoid; page-break-after:always;
-    } */
+.wrapper {
+    height: 100vh;
+    
+    display: grid;
+    place-items: center;
+  }
+  
+  .typing {
+    width: 141ch;
+    animation: typing 3s steps(30, end), blink .5s step-end infinite alternate;
+    white-space: nowrap;
+    overflow: hidden;
+    border-right: 15px solid;
+    font-family: monospace;
+    font-size: 1.5em;
+  }
+  
+  @keyframes typing {
+    from {
+      width: 0
+    }
+  }
+      
+  @keyframes blink {
+    100% {
+      /* border-color: rgb(38, 65, 25) */
+
+    }
+  }

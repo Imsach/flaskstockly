@@ -3,9 +3,12 @@
 {% block head %}
 {% endblock %}
 {% block content %}
-<br>
-<h4><p style="text-align:center"> - <a href="/run" target="_blank"><b>=RUN=</b></a> - Needs ONE click run unless code is interrupted somehow. [ Runs python code to pull all stock data from api ] </p></h4>
-<h4><p style="text-align:center">Script output - <a href="/view"><b>=View Dashboard=</b></a> - after run [ Every 13 seconds ( Api allows 5 requests/min for free) it adds Random $tock from SPY500 list ]</p></h4>
-<h4><p style="text-align:center"><br>Web app tabularizes Stocks data from Api & SPY500 list. [ Plus, manually entered stocks at <b>'/anystock'</b> ex. http://192.168.0.100/TSLA ]</p></h4>
 
+<div class="wrapper">
+    <div class="typing">
+<p style="text-align:center"> - <a href="/run" target="_blank"><b>=RUN=</b></a> - Needs ONE click run unless code is interrupted somehow. [ Runs python code to pull all stock data from api ] </p>
+<p style="text-align:center">Script output - <a href="/view"><b>=View Dashboard=</b></a> - after run [ Every 13 seconds ( Api allows 5 requests/min for free) it adds Random $tock from SPY500 list ]</p>
+<p style="text-align:center"><br>Web app tabularizes Stocks data from Api & SPY500 list. [ Plus, manually entered stocks at <b>'/anystock'</b> ex. http://192.168.0.100/TSLA ]</p>
+    </div>
+</div>
 {% endblock %}
