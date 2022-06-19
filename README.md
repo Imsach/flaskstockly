@@ -2,6 +2,11 @@
 
 
 This is basic flask web app which gets data from api and offers few fuctionality for stocks dashboard as search, filters & sorting.
+The API for this project is alphavantage. The documentaion API: https://www.alphavantage.co/documentation/. 
+
+
+
+
 
 Single click on 'RUN' will start getting data from API. 
 
