@@ -17,3 +17,11 @@ Now, Searching stock 'GME' here: (you can add stocks by going to http://IP/stock
 The main page is just basic links and information for use:
 
 ![alt text](https://github.com/Imsach/flaskstockly/blob/c38c3cc5d599ad02de51aba01c6ea86f1b0130af/screenshots/1indexmain.PNG)
+
+Single click on RUN would slowly generate searchable dataframe with fuctionality of sorting and filteing data:
+
+![alt text](https://github.com/Imsach/flaskstockly/blob/a729ba9542e68c37d1ba6d17a1f2aec94b9c7c22/screenshots/AfterRun2.PNG)
+
+Cheers!!
+
+
