@@ -154,7 +154,7 @@ def hello_world5(stockinfo=stockinfo):
                 time.sleep(12.5)
             # elif str(r.status_code).startswith('5'):
             #     print('we got 500')
-            
+
             else:
                 print(time.localtime())
                 time.sleep(300)
