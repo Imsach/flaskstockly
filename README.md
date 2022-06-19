@@ -1,7 +1,7 @@
 # flaskstockly
 
 
-This is basic flask web app which gets data from api and offers few fuctionalities for stocks dashboard as search, filters & sorting.
+This is basic flask web app which gets data from api and offers few functionalities  for stocks dashboard as search, filters & sorting.
 The API for this project is alphavantage. The documentaion API: https://www.alphavantage.co/documentation/. 
 
 
@@ -23,7 +23,7 @@ The main page is just basic links and information for use:
 
 ![alt text](https://github.com/Imsach/flaskstockly/blob/c38c3cc5d599ad02de51aba01c6ea86f1b0130af/screenshots/1indexmain.PNG)
 
-Single click on RUN would slowly generate searchable dataframe with fuctionality of sorting and filteing data:
+Single click on RUN would slowly generate searchable dataframe with functionalities such as sorting and filteing data:
 
 ![alt text](https://github.com/Imsach/flaskstockly/blob/a729ba9542e68c37d1ba6d17a1f2aec94b9c7c22/screenshots/AfterRun2.PNG)
 
