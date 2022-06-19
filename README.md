@@ -29,6 +29,10 @@ Single click on RUN would slowly generate searchable dataframe with functionalit
 
 ![alt text](https://github.com/Imsach/flaskstockly/blob/a729ba9542e68c37d1ba6d17a1f2aec94b9c7c22/screenshots/AfterRun2.PNG)
 
+Stocks can be added by input:
+
+![alt text](https://github.com/Imsach/flaskstockly/blob/46f7954f375ba47dd6a86e6308ae7c8050874ab1/screenshots/addstock.PNG)
+
 Cheers!!
 
 
