@@ -5,6 +5,10 @@
 <h4><p style="text-align:center"> - <a href="/run" target="_blank"><b>=RUN=</b></a> - Needs ONE click run unless code is interrupted somehow. [ Runs python code to pull all stock data from Api ] </p></h4>
 <h4><p style="text-align:center">Script output - <a href="/view"><b>=View Dashboard=</b></a> - after run [ Every 13 seconds ( Api allows 5 requests/min for free) it adds Random $tock from SPY500 list ]</p></h4>
 <h4><p style="text-align:center">Stocks in table: {% print(df.shape[0]) %} out of SPY500. [ Plus, manually entered stocks at <b>'/anystock'</b> ex. http://192.168.0.100/GME ]</p></h4>
+
+<p style="text-align:left"><input id="txt" name="order" type="text" maxlength="5" size="5">
+<input id='btn' type="submit" value="add stock" onclick="location.href='http://127.0.0.1/'+document.getElementById('txt').value"></p>
+
 <meta http-equiv="refresh" content="100; URL=/view">
 
 
