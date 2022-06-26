@@ -8,22 +8,30 @@ import lxml
 import time
 from random import shuffle
 import secapi
+import socket
+import socket
+
 
 
 app = Flask(__name__)
 stock = ''
-
+ip = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+ip.connect(("8.8.8.8", 80))
+ip = ip.getsockname()[0]
 stockinfo = []
+
 # print(stockinfo)
-time.localtime()
+# time.localtime()
+t1 = time.asctime()
 
 @app.route('/', methods=("POST", "GET"))
 def lol():
-    return render_template('index.html')
+    return render_template('index.html', ip=ip)
 
 
 @app.route('/<stock>', methods=("POST", "GET"))
 def hello_worlds(stock):
+    t1 = time.asctime()
     api_key = secapi.api_key
     u = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol='
     x = stock + '&apikey=' + api_key
@@ -34,15 +42,15 @@ def hello_worlds(stock):
     pd.set_option('colheader_justify', 'center')
 
     for info in data:
-        stockinfo.append([data['Global Quote']['01. symbol'], data['Global Quote']['02. open'], data['Global Quote']['03. high'], data['Global Quote']['04. low'], data['Global Quote']['05. price'], data['Global Quote']['06. volume'], data['Global Quote']['07. latest trading day'], data['Global Quote']['08. previous close'], data['Global Quote']['09. change'], data['Global Quote']['10. change percent']])
-    df = pd.DataFrame(data=stockinfo, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day', 'Previous close', 'Change', 'Change percent'])
+        stockinfo.append([data['Global Quote']['01. symbol'], data['Global Quote']['05. price'], data['Global Quote']['02. open'], data['Global Quote']['03. high'], data['Global Quote']['04. low'], data['Global Quote']['06. volume'], data['Global Quote']['07. latest trading day'], data['Global Quote']['08. previous close'], data['Global Quote']['09. change'], data['Global Quote']['10. change percent'], t1])
+    df = pd.DataFrame(data=stockinfo, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day', 'Previous close', 'Change', 'Change percent', 'Entered'])
 
 
     df = (df.drop_duplicates(subset='Symbol', keep='last'))
     print(df)
     print(stockinfo)
 
-    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, stockinfo=stockinfo, df=df)
+    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, stockinfo=stockinfo, df=df, ip=ip)
 
 
 # @app.route('/view', methods=['POST'])
@@ -65,15 +73,16 @@ def hello_worlds(stock):
 @app.route('/view', methods=("POST", "GET"))
 def hello_worldn():
     df = pd.DataFrame(data=stockinfo, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day',
-                                               'Previous close', 'Change', 'Change percent'])
+                                               'Previous close', 'Change', 'Change percent', 'Entered'])
     df = (df.drop_duplicates(subset='Symbol', keep='last'))
+    
             # df2 = (df2.reset_index()
             #        .drop_duplicates(subset='Symbol', keep='last')
             #        .set_index('index'))
     # pd.set_option('display.width', 1000)
     # pd.set_option('colheader_justify', 'center')
 
-    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, stockinfo=stockinfo, df=df)
+    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, stockinfo=stockinfo, df=df, ip=ip)
 
 
 # @app.route('/c/<stock>')
@@ -97,7 +106,7 @@ def hello_worldn():
 
 @app.route('/run', methods=("POST", "GET"))
 def hello_world5(stockinfo=stockinfo):
-
+    t1 = time.asctime()
     pd2 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
     first_table = pd2[0]
     second_table = pd2[1]
@@ -110,6 +119,7 @@ def hello_world5(stockinfo=stockinfo):
 
     for stock in stocks:
         if stock not in stockinfo:
+            
             print('First if')
             api_key = secapi.api_key
             u = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol='
@@ -119,8 +129,8 @@ def hello_world5(stockinfo=stockinfo):
             datas = r.json()
 
             df = pd.DataFrame(data=stockinfo,
-                              columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day',
-                                       'Previous close', 'Change', 'Change percent'])
+                              columns=['Symbol', 'Price', 'Open', 'High', 'Low', 'Volume', 'Latest trading day',
+                                       'Previous close', 'Change', 'Change percent', 'Entered'])
             df = (df.drop_duplicates(subset='Symbol', keep='last'))
 
 
@@ -145,9 +155,9 @@ def hello_world5(stockinfo=stockinfo):
             if r.status_code == 200:
                 print('2nd if')
                 print(r.status_code)
-
+                t1 = time.asctime()
                 for infos in datas:
-                    stockinfo.append([datas['Global Quote']['01. symbol'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['05. price'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent']])
+                    stockinfo.append([datas['Global Quote']['01. symbol'],  datas['Global Quote']['05. price'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent'], t1])
                 print(time.localtime())
                 print(type(stockinfo))
                 print(stockinfo)
@@ -156,11 +166,12 @@ def hello_world5(stockinfo=stockinfo):
             #     print('we got 500')
 
             else:
+                t1 = time.asctime()
                 print(time.localtime())
                 time.sleep(300)
                 print(time.localtime())
                 for infos in datas:
-                    stockinfo.append([datas['Global Quote']['01. symbol'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['05. price'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent']])
+                    stockinfo.append([datas['Global Quote']['01. symbol'], datas['Global Quote']['05. price'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent'], t1])
                 print(time.localtime())
                 print(r.status_code)
                 print('Inner else')
@@ -191,9 +202,9 @@ def hello_world5(stockinfo=stockinfo):
             print('Outer else')
             print(r.status_code)
             pass
-    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, stockinfo=stockinfo, df=df)
+    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, stockinfo=stockinfo, df=df, ip=ip)
 
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=80, debug=True)
