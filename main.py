@@ -9,9 +9,6 @@ import time
 from random import shuffle
 import secapi
 import socket
-import socket
-
-
 
 app = Flask(__name__)
 stock = ''
@@ -114,7 +111,7 @@ def hello_world5(stockinfo=stockinfo):
     stocks = df['Symbol'].values.tolist()
     shuffle(stocks)
 
-    print(stocks)
+    # print(stocks)
 
 
     for stock in stocks:
@@ -159,8 +156,8 @@ def hello_world5(stockinfo=stockinfo):
                 for infos in datas:
                     stockinfo.append([datas['Global Quote']['01. symbol'],  datas['Global Quote']['05. price'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent'], t1])
                 print(time.localtime())
-                print(type(stockinfo))
-                print(stockinfo)
+                # print(type(stockinfo))
+                # print(stockinfo)
                 time.sleep(12.5)
             # elif str(r.status_code).startswith('5'):
             #     print('we got 500')

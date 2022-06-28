@@ -12,6 +12,7 @@ td, th {
 }
 input {
     background-color: #F6D860;
+    size: 2em;
 }
 
 td:nth-child(1) {
@@ -38,59 +39,25 @@ footer {
    background: transparent;
 }
 
-
-/* 
-.wrapper {
-    height:100%;
-    
-    display: grid;
-    place-items: center;
-  }
-  
-  .typing {
-    width: 141ch;
-    animation: typing 2.5s steps(30, end), blink .5s step-end infinite alternate;
-    white-space: nowrap;
-    overflow: hidden;
-    border-right: 15px solid;
-    font-family: monospace;
-    font-size: 1.5em;
-  }
-  
-  @keyframes typing {
-    from {
-      width: 0
-    }
-  }
-      
-  @keyframes blink {
-    100% {
-       border-color: rgb(38, 65, 25) 
-    }
-  } */
-  a { color: rgb(13, 65, 10); text-decoration: none; text-transform: uppercase; }
+  a { color: rgb(13, 65, 10); text-decoration: none; text-transform:capitalize }
 
   html, body {
     height: 100%; 
   }
   
   body {
-    background: linear-gradient(-45deg, #3c0b0b, #c36e1d, #cf973d, #4f2009);
+    background: linear-gradient(-45deg, #703535, #c36e1d, #cf973d, #4f2009);
 	  background-size: 400% 400%;
     font-family: 'Merriweather', serif;
-    display: flex;
-    margin: auto;
-    justify-content: center;
-    color: rgb(39, 38, 38);
+    display:block;
+    justify-content:space-around;
+    color: rgb(24, 23, 23);
   }
   
   .container {
-    margin: 100px 15px;
+    margin: 10px 15px;
     max-width: 1370px;
-    
-    @media screen and (min-width: 600px){ 
-      padding: 0 30px;
-    }
+       
   }
   
   h2 {
@@ -98,14 +65,14 @@ footer {
   }
   
   p {
-    font-size: 16px;
+    font-size: 20px;
     line-height: 26px;
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
-    
-    @media screen and (min-width: 1200px){ 
-      font-size: 18px;
-      line-height: 30px;
-    }
+  }
+
+label {
+  font-size: 18px;
+  color: rgb(41, 41, 41);
   }
