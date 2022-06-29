@@ -44,8 +44,8 @@ def hello_worlds(stock):
 
 
     df = (df.drop_duplicates(subset='Symbol', keep='last'))
-    print(df)
-    print(stockinfo)
+    # print(df)
+    # print(stockinfo)
 
     return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, stockinfo=stockinfo, df=df, ip=ip)
 
@@ -204,4 +204,4 @@ def hello_world5(stockinfo=stockinfo):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=True)
+    app.run(host='0.0.0.0', port=80)

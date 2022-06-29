@@ -39,13 +39,13 @@ footer {
    background: transparent;
 }
 
-  a { color: rgb(13, 65, 10); text-decoration: none; text-transform:capitalize }
+a { color: rgb(13, 65, 10); text-decoration: none; text-transform:capitalize }
 
-  html, body {
+html, body {
     height: 100%; 
   }
   
-  body {
+body {
     background: linear-gradient(-45deg, #703535, #c36e1d, #cf973d, #4f2009);
 	  background-size: 400% 400%;
     font-family: 'Merriweather', serif;
@@ -54,18 +54,18 @@ footer {
     color: rgb(24, 23, 23);
   }
   
-  .container {
+.container {
     margin: 10px 15px;
     max-width: 1370px;
     margin: auto;
        
   }
   
-  h2 {
+h2 {
     font-weight: 400;
   }
   
-  p {
+p {
     font-size: 20px;
     line-height: 26px;
     word-wrap: break-word;
@@ -76,4 +76,22 @@ footer {
 label {
   font-size: 18px;
   color: rgb(41, 41, 41);
+  }
+
+button {
+    background-color: #d9be52;
+    border: none;
+    color: black;
+    padding: 5px 12px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 20px;
+    border-radius: 2px;
+    transition-duration: 0.4s
+  }
+
+button:hover {
+    background-color: #3f9342; 
+    color: rgb(12, 9, 9);
   }
