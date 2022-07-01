@@ -19,7 +19,7 @@ stockinfo = []
 
 # print(stockinfo)
 # time.localtime()
-t1 = time.asctime()
+
 
 @app.route('/', methods=("POST", "GET"))
 def lol():
@@ -28,7 +28,8 @@ def lol():
 
 @app.route('/<stock>', methods=("POST", "GET"))
 def hello_worlds(stock):
-    t1 = time.asctime()
+    t1 = time.localtime()
+    t1 = time.strftime("%m/%d/%Y, %H:%M:%S", t1)
     api_key = secapi.api_key
     u = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol='
     x = stock + '&apikey=' + api_key
@@ -103,7 +104,7 @@ def hello_worldn():
 
 @app.route('/run', methods=("POST", "GET"))
 def hello_world5(stockinfo=stockinfo):
-    t1 = time.asctime()
+   
     pd2 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
     first_table = pd2[0]
     second_table = pd2[1]
@@ -152,7 +153,8 @@ def hello_world5(stockinfo=stockinfo):
             if r.status_code == 200:
                 print('2nd if')
                 print(r.status_code)
-                t1 = time.asctime()
+                t1 = time.localtime()
+                t1 = time.strftime("%m/%d/%Y, %H:%M:%S", t1)
                 for infos in datas:
                     stockinfo.append([datas['Global Quote']['01. symbol'],  datas['Global Quote']['05. price'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent'], t1])
                 print(time.localtime())
@@ -163,7 +165,8 @@ def hello_world5(stockinfo=stockinfo):
             #     print('we got 500')
 
             else:
-                t1 = time.asctime()
+                t1 = time.localtime()
+                t1 = time.strftime("%m/%d/%Y, %H:%M:%S", t1)
                 print(time.localtime())
                 time.sleep(300)
                 print(time.localtime())
