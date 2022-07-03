@@ -1,3 +1,4 @@
+import random
 import requests
 import json
 from flask import Flask, request, render_template, redirect
@@ -70,57 +71,59 @@ def hello_world5(stockinfo=stockinfo):
 
     # print(stocks)
 
-
-    for stock in stocks:
-        if stock not in stockinfo:
+    while True:
+        for stock in stocks:
             
-            print('First if')
-            api_key = secapi.api_key
-            u = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol='
-            x = stock + '&apikey=' + api_key
-            url = u + x
-            r = requests.get(url)
-            datas = r.json()
+            if stock not in stockinfo:
+                
+                print('First if')
+                api_key = secapi.api_key
+                u = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol='
+                x = stock + '&apikey=' + api_key
+                url = u + x
+                r = requests.get(url)
+                datas = r.json()
 
-            df = pd.DataFrame(data=stockinfo,
-                              columns=['Symbol', 'Price', 'Open', 'High', 'Low', 'Volume', 'Latest trading day',
-                                       'Previous close', 'Change', 'Change percent', 'Entered'])
-            df = (df.drop_duplicates(subset='Symbol', keep='last'))
+                df = pd.DataFrame(data=stockinfo,
+                                columns=['Symbol', 'Price', 'Open', 'High', 'Low', 'Volume', 'Latest trading day',
+                                        'Previous close', 'Change', 'Change percent', 'Entered'])
+                df = (df.drop_duplicates(subset='Symbol', keep='last'))
 
 
-            print(r.status_code)
-
-            if r.status_code == 200:
-                print('2nd if')
                 print(r.status_code)
-                t1 = time.localtime()
-                t1 = time.strftime("%m/%d/%Y, %H:%M:%S", t1)
-                for infos in datas:
-                    stockinfo.append([datas['Global Quote']['01. symbol'],  datas['Global Quote']['05. price'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent'], t1])
-                print(time.localtime())
-                # print(type(stockinfo))
-                # print(stockinfo)
-                time.sleep(12.5)
-            # elif str(r.status_code).startswith('5'):
-            #     print('we got 500')
 
+                if r.status_code == 200:
+                    print('2nd if')
+                    print(r.status_code)
+                    t1 = time.localtime()
+                    t1 = time.strftime("%m/%d/%Y, %H:%M:%S", t1)
+                    for infos in datas:
+                        stockinfo.append([datas['Global Quote']['01. symbol'],  datas['Global Quote']['05. price'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent'], t1])
+                    print(time.localtime())
+                    # print(type(stockinfo))
+                    # print(stockinfo)
+                    time.sleep(12.5)
+                # elif str(r.status_code).startswith('5'):
+                #     print('we got 500')
+
+                else:
+                    print(time.localtime())
+                    time.sleep(random.randrange(70,120))
+                    print(time.localtime())
+                    t1 = time.localtime()
+                    t1 = time.strftime("%m/%d/%Y, %H:%M:%S", t1)
+                    for infos in datas:
+                        stockinfo.append([datas['Global Quote']['01. symbol'],  datas['Global Quote']['05. price'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent'], t1])
+                    print(time.localtime())
+                    print(r.status_code)
+                    print('Inner else')
+        
             else:
-                t1 = time.localtime()
-                t1 = time.strftime("%m/%d/%Y, %H:%M:%S", t1)
-                print(time.localtime())
-                time.sleep(300)
-                print(time.localtime())
-                for infos in datas:
-                    stockinfo.append([datas['Global Quote']['01. symbol'], datas['Global Quote']['05. price'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent'], t1])
-                print(time.localtime())
+                print('Outer else')
                 print(r.status_code)
-                print('Inner else')
-       
-        else:
-            print('Outer else')
-            print(r.status_code)
-            pass
-    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, stockinfo=stockinfo, df=df, ip=ip)
+                pass
+        return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, stockinfo=stockinfo, df=df, ip=ip, stock=stock)
+
 
 
 

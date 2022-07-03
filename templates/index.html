@@ -7,9 +7,10 @@
     <div class="typing"> -->
         <!-- <section class="container"> -->
         <p style="text-align:center"><input id="txt" name="order" type="text" maxlength="5" size="5">
-        <input id='button' type="button" value="add stock" onclick="location.href='http://192.168.1.104/'+document.getElementById('txt').value"></p>    
+        <input id='button' type="button" value="add stock" onclick="location.href='http://192.168.1.104/'+document.getElementById('txt').value"></p><br>
+
         <h4><p style="text-align:center"><button onclick="window.location.href='/run'">=Run=</button><br> Needs ONE click run unless code is interrupted somehow.<br>[ Runs python code to pull all stock data from Api ] </p></h4>
         <h4><p style="text-align:center"><button onclick="window.location.href='/view'">=View Dashboard=</button><br> Script output :- after run on 13 seconds interval it adds Random $tock from SPY500 list <br>[ ( Api allows 5 requests/min for free) ]</p></h4>
-        <h4><p style="text-align:center">Web app tabularizes Stocks data from Api & SPY500 list.<br>[ Plus, manually entered stocks at '/anystock' ex. http://192.168.0.100/TSLA ]<br> Web app is locally running on: {{ ip }}</p></h4>  
+        <h4><p style="text-align:center">Web app tabularizes Stocks data from Api & SPY500 list.<br>[ Plus, manually entered stocks at '/anystock' ex. http://{{ ip }}/TSLA ]<br> Web app is locally running on: {{ ip }}</p></h4>  
 <!-- </div> -->
 {% endblock %}
