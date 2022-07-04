@@ -2,8 +2,8 @@
 
 {% block content %}
 <!-- <section class="container"> -->
-<h4><p style="text-align:center"><button onclick="window.location.href='/run'">=Run=</button><br> Needs ONE click run unless code is interrupted somehow.<br>[ Runs python code to pull all stock data from Api ] </p></h4>
-<h4><p style="text-align:center"><button onclick="window.location.href='/view'">=Refresh Dashboard=</button><br> Script output :>- after run on 13 seconds interval it adds Random $tock from SPY500 list <br>[ ( Api allows 5 requests/min for free) ]</p></h4>
+<h4><p style="text-align:center"><button onclick="window.location.href='/run'">=Run=</button>~~<button onclick="window.location.href='/view'">=Refresh Dashboard=</button><br> Needs ONE click run unless code is interrupted somehow.<br>[ Runs python code to pull all stock data from API ] </p></h4>
+<h4><p style="text-align:center">Script output >_ after run on 13 seconds interval it adds Random $tock from SPY500 list <br>[ ( API allows 5 requests/min for free) ]</p></h4>
 <h4><p style="text-align:center">Stocks in table: {% print(df.shape[0]) %} out of SPY500. <br>[ Plus, manually entered stocks at <b>'/anystock'</b> ex. http://{{ ip }}/{% print(df.iloc(0)[0, 0]) %} ]</p></h4>
 
 <p style="text-align:center"><input id="txt" name="order" type="text" maxlength="5" size="5">
