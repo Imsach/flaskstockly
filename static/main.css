@@ -18,7 +18,7 @@ input {
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 16px;
+  font-size: 18px;
   border-radius: 2px;
   transition-duration: 0.4s
 }
@@ -54,7 +54,7 @@ footer {
 a { color: rgb(13, 65, 10); text-decoration: none; text-transform:capitalize }
 
 html, body {
-    height: 100%; 
+    height:auto; 
   }
   
 body {
@@ -62,8 +62,8 @@ body {
 	  background-size: 400% 400%;
     font-family: 'Merriweather', serif;
     display:block;
-    justify-content:space-around;
-    color: rgb(66, 36, 36);
+    justify-content:space-evenly;
+    color: rgb(66, 32, 32);
   }
   
 .container {
@@ -91,7 +91,7 @@ label {
   }
 
 button {
-    background-color: #d9be52;
+    background-color: #f7f5ec;
     border: none;
     color: black;
     padding: 5px 5px;
