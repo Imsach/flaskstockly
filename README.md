@@ -38,6 +38,7 @@ Now, Searching stock 'AMZN' here: (you can add stocks by going to http://YourIP:
 
 ![alt text](https://github.com/Imsach/flaskstockly/blob/4aff88eeaafad8de82a5065f66bca0b2b3ad8ada/screenshots/StockSearch.PNG)
 
+**Make Sure to _Change_ API in _Secapi.py_ to your free API from alphavantage or 'demo'.** 
 
 Cheers!!
 
