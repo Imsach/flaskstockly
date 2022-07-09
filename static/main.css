@@ -11,7 +11,7 @@ td, th {
     padding: 5px;
 }
 input {
-  background-color: #d9be52;
+  background-color: #92b1e3;
   border: none;
   color: black;
   padding: 5px 5px;
@@ -23,26 +23,39 @@ input {
   transition-duration: 0.4s
 }
 input:hover {
-  background-color: #c77860; 
-  color: rgb(12, 9, 9);
+  background-color: #e2d7d4; 
+  color: rgb(24, 28, 49);
 }
 
 td:nth-child(1) {
-    background-color: #F6D860;
+    background-color: #15243e;
+    font-weight: bold;
 }
 
-td:hover {background-color: #E3CAA5;}
+td:hover {background-color: #2d5592;}
 
 th {
-    background-color: #C69B7B;
+    background-color: #0f1c2f;
 }
 
 td {
-    background-color: #FFEBC1;
+    background-color: #183155;
+}
+
+select {
+  background: #396ebc;
+}
+
+#DataTables_Table_0_info {
+  color: #294e85;
+}
+
+#DataTables_Table_0_paginate {
+  color: #294e85;
 }
 
 footer {
-  font-family: 'Merriweather', serif;
+   font-family: 'Merriweather', serif;
    position:relative;
    left:0px;
    bottom:0px;
@@ -51,30 +64,30 @@ footer {
    background: transparent;
 }
 
-a { color: rgb(13, 65, 10); text-decoration: none; text-transform:capitalize }
+a { color: rgb(88, 45, 174); text-decoration: none; text-transform:capitalize }
 
 html, body {
     height:auto; 
   }
   
 body {
-    background: linear-gradient(-45deg, #360a01, #b8671a, #edba69, #4f2009);
+    background: linear-gradient(-45deg, #0d1117, #060c30, #1a0921, #0d1117);
 	  background-size: 400% 400%;
     font-family: 'Merriweather', serif;
     display:block;
     justify-content:space-evenly;
-    color: rgb(66, 32, 32);
+    color: #acbad5;
   }
   
 .container {
     margin: 10px 15px;
     max-width: 1370px;
-    margin: auto;
-       
+    border: 0.5px solid #201a2f;
   }
   
-h2 {
-    font-weight: 400;
+h4, h5 {
+    font-weight: 300;
+    color: rgb(112, 120, 161);
   }
   
 p {
@@ -87,11 +100,11 @@ p {
 
 label {
   font-size: 18px;
-  color: rgb(50, 28, 28);
+  color: #3c65a3;
   }
 
 button {
-    background-color: #f7f5ec;
+    background-color: #5c8cd3;
     border: none;
     color: black;
     padding: 5px 5px;
@@ -104,8 +117,8 @@ button {
   }
 
 button:hover {
-    background-color: #a35d48;
-    color: rgb(12, 9, 9);
+    background-color: #b4c6e0;
+    color: #142237;
   }
 
 label {

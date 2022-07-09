@@ -1,12 +1,11 @@
 {% extends "base2.html" %}
 
 {% block content %}
+<title>Stock Dashboard</title>
 <!-- <section class="container"> -->
-<h4><p style="text-align:center"><button onclick="window.location.href='/run'">=Run=</button>_-^-_<button onclick="window.location.href='/view'">=Refresh Dashboard=</button><br> Needs ONE click run unless code is interrupted somehow.<br>[ Runs python code to pull all stock data from API ] </p></h4>
-<h4><p style="text-align:center"> >>Script>> after run on 13 seconds interval it adds Random $tock from SPY500 list <br>[ ( API allows 5 requests/min for free) ]</p></h4>
-<h4><p style="text-align:center">Stocks in table: {% print(df.shape[0]) %} out of SPY500. <br>[ Plus, manually entered stocks at <b>'/anystock'</b> ex. http://{{ ip }}/{% print(df.iloc(0)[0, 0]) %} ]</p></h4>
+<h4><p style="text-align:center"><button onclick="window.location.href='/run'">=Run=</button>____<button onclick="window.location.href='/view'">=Refresh Dashboard=</button><br>[ 'RUN' runs python code to pull all stock data from API ] <br> >_> RUNScript >_> on 13 seconds interval it adds Random $tock from SPY500 list <br>[ ( API allows 5 requests/min for free) ]</p></h4>
 
-<p style="text-align:center"><input id="txt" name="order" type="text" maxlength="5" size="5">
+<p style="text-align:center"><input id="txt" name="addstock" type="text" maxlength="5" size="5">
 <input id='button' type="button" value="add stock" onclick="location.href='http://192.168.1.104/'+document.getElementById('txt').value"></p>
 
 <meta http-equiv="refresh" content="35; URL=/view">
@@ -30,9 +29,21 @@
       {% for row in row_data %}
       <tr>
         {% for col, row_ in zip(column_names, row) %}
+        {% if col == 'Change' and row_|float < 0.0 %}
+       
+        <td style ="background-color: rgb(158, 37, 37)"> {{ row_ }} </td>
 
-        <td>{{ row_ }}</td>
-        {% endfor %}
+        {% elif col == 'Change percent' and row_|float > 3.0 %}
+
+        <td style ="background-color: #eff3f8"> {{ row_ }} </td>
+
+        {% else %}
+       
+        <td> {{ row_ }} </td>
+      
+        {% endif %}
+        <!-- <td>{{ row_ }}</td> -->
+        {% endfor %} 
       </tr>
       {% endfor %}
 
@@ -40,6 +51,8 @@
     </tbody>
 
   </table>  
+
+  <h4><p style="text-align:center">Stocks in table: {% print(df.shape[0]) %} out of SPY500. <br>[ Plus, manually entered stocks at <b>'/anystock'</b> ex. http://{{ ip }}/{% print(df.iloc(0)[0, 0]) %} ]</p></h4>
 
   {% block scripts %} 
 
