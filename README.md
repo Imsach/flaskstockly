@@ -1,8 +1,8 @@
 # flaskstockly
 
 
-This is basic flask web app which gets data from api and offers few functionalities  for stocks dashboard as search, filters & sorting.
-The API for this project is alphavantage. The documentaion API: https://www.alphavantage.co/documentation/. 
+A Python flask web app which gets data from api and offers few functionalities for stocks dashboard as search, filters & sorting.
+The API for this project is alphavantage but webscarpping or different Api can be used with some modification of the code. 
 
 We can add more API queries but since we are allowed 5 requests per minute for free API; slowly but surely you can gather data that way.
 To add more queries using documentation mentioned earlier; one can add more data and dataframes later to combine.
@@ -11,6 +11,9 @@ BASH command line needed to initiate the app
 
 ```bash
 python -m pip install -r requirements.txt
+```
+
+```bash
 py main.py
 ```
 
