@@ -5,11 +5,12 @@ from flask import Flask, request, render_template, redirect
 import pandas as pd
 import numpy as np
 from pandas import DataFrame
-import lxml
 import time
 from random import shuffle
 import secapi
 import socket
+from bs4 import BeautifulSoup
+from selenium import webdriver
 
 app = Flask(__name__)
 stock = ''
@@ -121,8 +122,67 @@ def hello_world5(stockinfo=stockinfo):
                 pass
         return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, stockinfo=stockinfo, df=df, ip=ip, stock=stock)
 
+@app.route('/run2', methods=("POST", "GET"))
+def hhh():
+    
+    driver = webdriver.Chrome(".\static\chromedriver.exe")
 
+    Website = 'https://stockbeep.com/trending-stocks-ssrvol-desc'
+    Table_name = 'DataTables_Table_0'
 
+    driver.get(Website)
+    html = driver.page_source
+    driver.quit()
+
+    soup = BeautifulSoup(html, 'lxml')
+
+    table = soup.find(id=Table_name)
+
+    tr = table.find_all('tr')
+    type(tr)
+    values = list()
+    try:
+        for idx, elem in enumerate(tr):
+            time = elem.select_one('.column-sstime').get_text(strip=True)
+            ticker = elem.select_one('.column-sscode').get_text(strip=True)
+            name = elem.select_one('.column-ssname').get_text(strip=True)
+            last = elem.select_one('.column-sslast').get_text(strip=True)
+            high = elem.select_one('.column-sshigh').get_text(strip=True)
+            chg = elem.select_one('.column-sschg').get_text(strip=True)
+            chg_perc = elem.select_one('.column-sschgp').get_text(strip=True)
+            # dlr = elem.select_one('.column-ss5d').get_text(strip=True)
+            vol = elem.select_one('.column-ssvol').get_text(strip=True)
+            rvol = elem.select_one('.column-ssrvol').get_text(strip=True)
+            cap = elem.select_one('.column-sscap').get_text(strip=True)
+            comment = elem.select_one('.column-sscomment').get_text(strip=True)
+
+            if idx != 0:
+                values.append({
+                    'time' : time,
+                    'ticker' : ticker,
+                    'name': name,
+                    'last' : last,
+                    'high' : high,
+                    'chg' : chg,
+                    'chg_perc' : chg_perc,
+                    # '5d' : dlr,
+                    'vol' : vol,
+                    'rvol' : rvol,
+                    'cap' : cap,
+                    'comment' : comment
+                })
+    except:
+        print('Error occured')
+    df = pd.DataFrame(data=values,
+                      columns=['time', 'ticker', 'name', 'last', 'high', 'chg',
+                                        'chg_perc', 'vol', 'rvol', 'cap', 'comment'])
+    df = (df.drop_duplicates(subset='ticker', keep='last'))
+
+    print(values)
+    print(tr)
+
+    
+    return render_template('trend.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, values=values, df=df, ip=ip, stockinfo=stockinfo, stock=stock)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=80, debug=True)
