@@ -11,6 +11,7 @@ import secapi
 import socket
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 app = Flask(__name__)
 stock = ''
@@ -124,8 +125,12 @@ def hello_world5(stockinfo=stockinfo):
 
 @app.route('/run2', methods=("POST", "GET"))
 def hhh():
+
+    options = Options()
+    options.headless = True
+    options.add_argument("--window-size=1920,1200")
     
-    driver = webdriver.Chrome(".\static\chromedriver.exe")
+    driver = webdriver.Chrome(options=options, executable_path='.\static\chromedriver.exe')
 
     Website = 'https://stockbeep.com/trending-stocks-ssrvol-desc'
     Table_name = 'DataTables_Table_0'
@@ -139,7 +144,7 @@ def hhh():
     table = soup.find(id=Table_name)
 
     tr = table.find_all('tr')
-    type(tr)
+    
     values = list()
     try:
         for idx, elem in enumerate(tr):
@@ -178,8 +183,8 @@ def hhh():
                                         'chg_perc', 'vol', 'rvol', 'cap', 'comment'])
     df = (df.drop_duplicates(subset='ticker', keep='last'))
 
-    print(values)
-    print(tr)
+    # print(values)
+    # print(tr)
 
     
     return render_template('trend.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, values=values, df=df, ip=ip, stockinfo=stockinfo, stock=stock)
