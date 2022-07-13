@@ -12,6 +12,8 @@ import socket
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import plotly
+import plotly.express as px
 
 app = Flask(__name__)
 stock = ''
@@ -57,8 +59,17 @@ def hello_worldn():
     df = pd.DataFrame(data=stockinfo, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day',
                                                'Previous close', 'Change', 'Change percent', 'Entered'])
     df = (df.drop_duplicates(subset='Symbol', keep='last'))
-              
-    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, stockinfo=stockinfo, df=df, ip=ip)
+    
+    # fig = px.scatter(df, x="Price", y='Change', size="Change percent", color="Symbol", hover_name="Symbol", size_max=60)
+    
+    fig = px.scatter(df, x="Price", y="Change percent", color="Symbol", log_x=True, log_y=True, size_max=60)
+    fig.update_layout(height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#3880cb")
+    fig.update_xaxes(title_font_color="#3770ab", gridcolor='#202436')
+    fig.update_yaxes(title_font_color="#3770ab", gridcolor='#202436')
+
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), graphJSON=graphJSON, zip=zip, stockinfo=stockinfo, df=df, ip=ip)
 
 
 @app.route('/run', methods=("POST", "GET"))
@@ -155,7 +166,7 @@ def hhh():
             high = elem.select_one('.column-sshigh').get_text(strip=True)
             chg = elem.select_one('.column-sschg').get_text(strip=True)
             chg_perc = elem.select_one('.column-sschgp').get_text(strip=True)
-            # dlr = elem.select_one('.column-ss5d').get_text(strip=True)
+            dlr = elem.select_one('.column-5d').get_text(strip=True)
             vol = elem.select_one('.column-ssvol').get_text(strip=True)
             rvol = elem.select_one('.column-ssrvol').get_text(strip=True)
             cap = elem.select_one('.column-sscap').get_text(strip=True)
@@ -170,7 +181,7 @@ def hhh():
                     'high' : high,
                     'chg' : chg,
                     'chg_perc' : chg_perc,
-                    # '5d' : dlr,
+                    '5d' : dlr,
                     'vol' : vol,
                     'rvol' : rvol,
                     'cap' : cap,
@@ -180,14 +191,19 @@ def hhh():
         print('Error occured')
     df = pd.DataFrame(data=values,
                       columns=['time', 'ticker', 'name', 'last', 'high', 'chg',
-                                        'chg_perc', 'vol', 'rvol', 'cap', 'comment'])
+                                        'chg_perc', '5d', 'vol', 'rvol', 'cap', 'comment'])
     df = (df.drop_duplicates(subset='ticker', keep='last'))
+    fig = px.scatter(df, x="chg_perc", y="rvol", color="ticker", log_x=True, log_y=True, size_max=60)
+    fig.update_layout(height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#3880cb")
+    fig.update_xaxes(title_font_color="#3770ab", gridcolor='#202436')
+    fig.update_yaxes(title_font_color="#3770ab", gridcolor='#202436')
 
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     # print(values)
     # print(tr)
 
     
-    return render_template('trend.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, values=values, df=df, ip=ip, stockinfo=stockinfo, stock=stock)
+    return render_template('trend.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, graphJSON=graphJSON, values=values, df=df, ip=ip, stockinfo=stockinfo, stock=stock)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)

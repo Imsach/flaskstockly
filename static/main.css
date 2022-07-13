@@ -11,7 +11,7 @@ td, th {
     padding: 5px;
 }
 input {
-  background-color: #92b1e3;
+  background-color: #5c8cd3;
   border: none;
   color: black;
   padding: 5px 5px;
@@ -81,7 +81,7 @@ body {
   
 .container {
     margin: 10px 15px;
-    border: 0.5px solid #201a2f;
+    /* border: 0.5px solid #201a2f; */
   }
   
 h4, h5 {
