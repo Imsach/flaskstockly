@@ -170,7 +170,7 @@ def hhh():
             vol = elem.select_one('.column-ssvol').get_text(strip=True)
             rvol = elem.select_one('.column-ssrvol').get_text(strip=True)
             cap = elem.select_one('.column-sscap').get_text(strip=True)
-            comment = elem.select_one('.column-sscomment').get_text(strip=True)
+            ChartFacts = elem.select_one('.column-sscomment').get_text(strip=True)
 
             if idx != 0:
                 values.append({
@@ -180,20 +180,20 @@ def hhh():
                     'last' : last,
                     'high' : high,
                     'chg' : chg,
-                    'chg_perc' : chg_perc,
+                    "% change" : chg_perc,
                     '5d' : dlr,
                     'vol' : vol,
-                    'rvol' : rvol,
+                    'Relative Vol' : rvol,
                     'cap' : cap,
-                    'comment' : comment
+                    'Chart Facts' : ChartFacts
                 })
     except:
         print('Error occured')
     df = pd.DataFrame(data=values,
                       columns=['time', 'ticker', 'name', 'last', 'high', 'chg',
-                                        'chg_perc', '5d', 'vol', 'rvol', 'cap', 'comment'])
+                                        '% change', '5d', 'vol', 'Relative Vol', 'cap', 'Chart Facts'])
     df = (df.drop_duplicates(subset='ticker', keep='last'))
-    fig = px.scatter(df, x="chg_perc", y="rvol", color="ticker", log_x=True, log_y=True, size_max=60)
+    fig = px.scatter(df, x="% change", y="Relative Vol", color="ticker", log_x=True, log_y=True, size_max=60)
     fig.update_layout(height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#3880cb")
     fig.update_xaxes(title_font_color="#3770ab", gridcolor='#202436')
     fig.update_yaxes(title_font_color="#3770ab", gridcolor='#202436')

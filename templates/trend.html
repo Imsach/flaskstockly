@@ -3,6 +3,7 @@
 {% block content %}
 <title>Trend Dashboard</title>
 <!-- <section class="container"> -->
+
 <h4><p style="text-align:center">__<button onclick="window.location.href='/view'">=SPY500=</button>____<button onclick="window.location.href='/run2'">=Refresh Dashboard=</button>___<input id="txt" name="addstock" type="text" maxlength="5" size="5">
 <input id='button' type="button" value="add stock" onclick="location.href='http://{{ ip }}/'+document.getElementById('txt').value"></p>
 <div id="chart" class="chart"></div>
@@ -29,7 +30,7 @@
         {% for col, row_ in zip(column_names, row) %}
         {% if col == 'rvol' and row_|float > 1.0 %}
        
-        <td style ="background-color: #10223a"> {{ row_ }} </td>
+        <td style ="background-color: #a4b5cb"> {{ row_ }} </td>
 
         {% else %}
        
@@ -47,18 +48,22 @@
   </table>
    
     {% block scripts %} 
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <script type="text/javascript">
-    var graphs = {{graphJSON | safe}};
-    Plotly.plot('chart',graphs,{});        
-  </script>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
 </head><body><script type="text/javascript">$(document).ready(function(){$('table').DataTable({
     "pageLength": 15,
     order: [[9, 'desc']]
 });});</script> 
-
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script type="text/javascript">
+    var graphs = {{graphJSON | safe}};
+    Plotly.plot('chart',graphs,{});        
+  </script>
+  <script>
+    $(window).on('load', function () {
+      $('#loading').hide();
+    }) 
+  </script>
     {% endblock %}
 {% endblock %}
