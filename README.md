@@ -17,28 +17,31 @@ python -m pip install -r requirements.txt
 py main.py
 ```
 
+**Make Sure to _Change_ API in _Secapi.py_ to your free API from alphavantage or 'demo'.** 
 
 Single click on 'RUN' will start getting data from API.
 
 Click on 'View Dashboard' OR 'Refresh Dashboard' shows stocks data if any gathered. (click on 'RUN' again if no data shown) 
 
-The main page is just basic links and information for use:
+The Front page is just basic links and information for use:
 
-![alt text](https://github.com/Imsach/flaskstockly/blob/816b6a95337d75a09cc26225f1a897151542bc0a/screenshots/frontpage.PNG)
+![alt text](https://github.com/Imsach/flaskstockly/blob/0d86fb3e63d7544410c61282cb22ca7626f3120e/screenshots/frontpage.gif)
 
 Single click on RUN would slowly generate searchable dataframe with functionalities such as sorting and filteing data:
 
-![alt text](https://github.com/Imsach/flaskstockly/blob/816b6a95337d75a09cc26225f1a897151542bc0a/screenshots/afterRUN.PNG)
+![alt text](https://github.com/Imsach/flaskstockly/blob/0d86fb3e63d7544410c61282cb22ca7626f3120e/screenshots/stocks-dashboard.gif)
 
 Stocks can be added by input:
 
-![alt text](https://github.com/Imsach/flaskstockly/blob/816b6a95337d75a09cc26225f1a897151542bc0a/screenshots/Addstock_filterdata.PNG)
+![alt text](https://github.com/Imsach/flaskstockly/blob/0d86fb3e63d7544410c61282cb22ca7626f3120e/screenshots/Add-stock.gif)
 
-Now, Searching stock 'AMZN' here: (you can add stocks by going to http://YourIP:80/stockname
+Now, Sorting stocks here: 
 
-![alt text](https://github.com/Imsach/flaskstockly/blob/4aff88eeaafad8de82a5065f66bca0b2b3ad8ada/screenshots/StockSearch.PNG)
+![alt text](https://github.com/Imsach/flaskstockly/blob/0d86fb3e63d7544410c61282cb22ca7626f3120e/screenshots/sorting-stocks.gif)
 
-**Make Sure to _Change_ API in _Secapi.py_ to your free API from alphavantage or 'demo'.** 
+Trending stock dashboard:
+![alt text](https://github.com/Imsach/flaskstockly/blob/0d86fb3e63d7544410c61282cb22ca7626f3120e/screenshots/trending-dashboard.gif)
+
 
 Cheers!!
 
