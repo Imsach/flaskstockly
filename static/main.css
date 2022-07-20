@@ -48,17 +48,20 @@ input:hover {
 td:nth-child(1) {
     background-color: #dfdfdf;
     font-weight: bold;
+    font-size: 0.9em;
 }
 
 td:hover {background-color: #aabbd6;}
 
 th {
     background-color: #1d2425;
+    font-size: 0.9em;
 }
 
 td {
     color: #1d2425;
     background-color: #f7f8fa;
+    font-size: 0.9em;
 }
 
 select {
