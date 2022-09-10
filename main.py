@@ -36,9 +36,7 @@ def hello_worlds(stock):
     t1 = time.localtime()
     t1 = time.strftime("%m/%d/%Y, %H:%M:%S", t1)
     api_key = secapi.api_key
-    u = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol='
-    x = stock + '&apikey=' + api_key
-    url = u + x
+    url = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=' + stock + '&apikey=' + api_key
     r = requests.get(url)
     data = r.json()
    
