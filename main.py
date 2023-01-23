@@ -71,8 +71,8 @@ def getStock(stock):
 
         df = (df.drop_duplicates(subset='Symbol', keep='last'))
     except KeyError:
-        return "Invalid stock symbol"
-    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, stockinfo=stockinfo, df=df, ip=ip)
+        return '<style>p {text-align: center;}</style> <p>Invalid stock symbol<br>or<br>Wrong API key</p>'
+    return redirect('/view')
 
 
 """
@@ -110,16 +110,11 @@ def hello_worldn():
     return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), graphJSON=graphJSON, zip=zip, stockinfo=stockinfo, df=df, ip=ip)
 
 '''
-This code creates a route '/run' which is accessible using the POST and GET methods.
-It then reads a table from Wikipedia and stores it in the variable 'df'. 
-It then creates a list of stocks from the table and shuffles it. 
-The code then enters a loop that will run for each stock in the list. 
-If the stock is not in the 'stockinfo' variable, an API request is made to AlphaVantage
-to get data about that stock. This data is then stored in a Pandas DataFrame and 
-appended to 'stockinfo'. If the request is successful, 
-it will wait 12.5 seconds before making another request.
-If not, it will wait between 70-120 seconds before making another request.
-Finally, it renders an HTML template with all of the data stored in 'stockinfo'.
+This code is a route for the app that will run when the user visits the '/run' page. 
+It will scrape data from a Wikipedia page about S&P 500 companies and store it in a list called 'stocks'.
+It will then use an API key to call data from AlphaVantage, which will be stored in a list called 'stockinfo'.
+The code also includes a time.sleep() function to delay the API calls and prevent too many requests from being sent at once.
+Finally, it redirects the user to the '/view' page.
 
 '''
 
@@ -132,7 +127,8 @@ def hello_world5(stockinfo=stockinfo):
     df = first_table
     stocks = df['Symbol'].values.tolist()
     shuffle(stocks)
-    while True:
+    count = 0
+    while count < 2:
         for stock in stocks:
             
             if stock not in stockinfo:
@@ -170,13 +166,14 @@ def hello_world5(stockinfo=stockinfo):
             else:
                 
                 pass
-        return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, stockinfo=stockinfo, df=df, ip=ip, stock=stock)
+            count += 1
+        return redirect('/view')
 
 '''
 
 This code is defining a route '/run2' with the methods POST and GET. 
 It then defines a function hhh() which uses webdriver to scrape data
-from the website 'https://stockbeep.com/...'. The scraped data is
+from the website 'stockbeep'. The scraped data is
 stored in a BeautifulSoup object, which is then parsed into a Pandas DataFrame.
 The DataFrame is used to create a plotly scatterplot graph,
 which is converted into a JSON object and rendered in the template 'trend.html'.
