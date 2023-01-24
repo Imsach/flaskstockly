@@ -3,6 +3,7 @@
 {% block content %}
 <title>Stock Dashboard</title>
 <!-- <section class="container"> -->
+<div id="loading2"><h1 style="text-align:center; margin-top: 100px">Loading...</h1></div>
 <h4><p style="text-align:center"><button onclick="window.location.href='/run2'">=Trending Stocks=</button>____<button onclick="window.location.href='/run'", title="Click on Refresh Dashboard once clicked on 'Run SPY 500'">=Run SPY500=</button>____<button onclick="window.location.href='/view'">=Refresh Dashboard=</button>___<input id="txt" name="addstock" type="text" maxlength="5" size="5">
 <input id='button' type="button" value="add stock" onclick="location.href='http://{{ip}}/'+document.getElementById('txt').value"></p>
 
@@ -64,6 +65,17 @@
     "pageLength": 15,
     order: [[10, 'desc']]
 });});</script> 
+  <script>
+    $('button[onclick^="window.location.href=\'/run\'"]').click(function(){
+        $('#loading2').show();
+    });
+    $('button[onclick^="window.location.href=\'/run2\'"]').click(function(){
+        $('#loading2').show();
+    });
+    $(window).on('load', function () {
+        $('#loading2').hide();
+    }); 
+</script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script type="text/javascript">
       var graphs = {{graphJSON | safe}};
