@@ -74,7 +74,7 @@ def stock_data():
         queryNews += f" WHERE symbol='{symbol}'"
 
 
-    chart_exists = os.path.exists('static/volume_date.html')
+    chart_exists = os.path.exists('static/volume_price.html')
     cursor = conn.execute(query)
     cursorNews = conn.execute(queryNews)
 
