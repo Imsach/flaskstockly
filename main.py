@@ -23,7 +23,7 @@ from pandas import DataFrame
 import time
 from random import shuffle
 from datetime import datetime
-import secapi # Importing API key from secapi
+import secapi # To import API key from secapi
 import socket # Used to get the IP address of the user's machine.
 from bs4 import BeautifulSoup # Used for web scraping.
 from selenium import webdriver # Used to control a browser programmatically.
