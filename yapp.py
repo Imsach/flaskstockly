@@ -1,9 +1,9 @@
-import os, shutil, pandas as pd
+import os, pandas as pd
 import yfinance as yf
 import datetime as dt
 import sqlite3
 from flask import Flask, jsonify, request, render_template
-import plotly.express as px
+import plotly.graph_objs as go
 
 app = Flask(__name__)
 
@@ -31,7 +31,7 @@ else:
 
 conn = sqlite3.connect('stock_data.db')
 
-image_HTML = 'static/volume_date.html'
+image_HTML = 'static/volume_price.html'
 if os.path.exists(image_HTML):
     os.remove(image_HTML)
 
@@ -54,8 +54,10 @@ def stock_data():
         data.drop(["Dividends", "Stock Splits", "Capital Gains"], axis=1, inplace=True, errors='ignore')
         data.drop(["Capital Gains"], axis=1, inplace=True, errors='ignore')
         # Plot the data using Plotly
-        fig = px.line(data, x='Date', y='Volume', log_y=True, markers=True, template='plotly_dark')
-        fig.update_layout(title="Volume of Stock Traded Over Time", xaxis_title="Date", yaxis_title="Volume", xaxis_tickangle=-45, font=dict(size=16, color="#7f7f7f"))
+        fig1 = go.Scatter(x=data['Date'], y=data['Volume'], mode='lines', name='Volume')
+        fig2 = go.Scatter(x=data['Date'], y=data['Close'], mode='lines', name='Price', yaxis='y2')
+        layout = go.Layout(title='Stock Volume and Price', template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='Volume (in millions)'), yaxis2=dict(title='Price', overlaying='y', side='right'))
+        fig = go.Figure(data=[fig1, fig2], layout=layout)
         fig.write_html(image_HTML)
         # Adding data to the database
         data['symbol'] = stock.ticker
