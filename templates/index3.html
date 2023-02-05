@@ -6,7 +6,7 @@
         <h1>Stock Data</h1>
     <form action="/stock_data" method="get">
         <label for="symbol">Enter Stock Symbol:</label>
-        <input type="text" id="symbol" name="symbol">
+        <input type="text" id="symbol" name="symbol" onkeyup="this.value=this.value.toUpperCase();">
         <input type="submit" value="Submit">
     </form>
     <br>
