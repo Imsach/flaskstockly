@@ -258,6 +258,7 @@ if not os.path.exists("stock_data.db"):
     # Create the tables
     conn.execute("CREATE TABLE stock_data (Date TEXT, Open REAL, High REAL, Low REAL, Close REAL, Adj Close REAL, Volume INTEGER, symbol TEXT, Dividends REAL, Stock Splits REAL, Capital Gains REAL)")
     conn.execute("CREATE TABLE news_data (symbol TEXT, title TEXT, publisher TEXT, link TEXT, providerPublishTime TIMESTAMP, relatedTickers TEXT)")
+    conn.execute("CREATE TABLE mutualfund_data (Holder TEXT, Shares REAL, Date Reported TIMESTAMP, '% Out' REAL, Value REAL)")
 
     conn.commit()
     
@@ -271,6 +272,10 @@ else:
     cursorNews = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='news_data'")
     if cursorNews.fetchone():
         conn.execute("DELETE FROM news_data")
+        conn.commit()
+    mutualfundNews = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='mutualfund_data'")
+    if mutualfundNews.fetchone():
+        conn.execute("DELETE FROM mutualfund_data")
         conn.commit()
 
 conn = sqlite3.connect('stock_data.db')
@@ -287,6 +292,7 @@ def stock_data():
     symbol = request.args.get('symbol')
     query = "SELECT * FROM stock_data"
     queryNews = "SELECT * FROM news_data"
+    queryMutualfund = "SELECT * FROM mutualfund_data"
 
     if symbol:
         query += f" WHERE symbol='{symbol}'"
@@ -316,18 +322,32 @@ def stock_data():
         news_df['symbol'] = stock.ticker
         news_df.to_sql('news_data', conn, if_exists='replace', index=False)
         queryNews += f" WHERE symbol='{symbol}'"
+        queryMutualfund += f" WHERE symbol='{symbol}'"
+        mutualfund = stock.get_mutualfund_holders()
+        mutualfund_df = pd.DataFrame(mutualfund)
+        mutualfund_df['symbol'] = stock.ticker
+        mutualfund_df["Date Reported"] = mutualfund_df["Date Reported"].apply(lambda x: x.strftime('%Y-%m-%d'))
+        mutualfund_df["% Out"] = mutualfund_df["% Out"].apply(lambda x: 100 * float(x))
+        mutualfund_df["% Out"] = mutualfund_df["% Out"].apply(lambda x: "{:,.3f} %".format(x))
+        
+        mutualfund_df.to_sql('mutualfund_data', conn, if_exists='replace', index=False)
+
+
+
 
 
     chart_exists = os.path.exists('static/volume_price.html')
     cursor = conn.execute(query)
     cursorNews = conn.execute(queryNews)
+    cursorMutualfund = conn.execute(queryMutualfund)
 
     data = cursor.fetchall()
     newsData = cursorNews.fetchall()
+    mutualfundData = cursorMutualfund.fetchall()
 
     conn.close()
     
-    return render_template("index3.html", data=data, newsData=newsData, symbol=symbol, chart_exists=chart_exists)
+    return render_template("index3.html", data=data, newsData=newsData, mutualfundData = mutualfundData, symbol=symbol, chart_exists=chart_exists)
 
 
 '''

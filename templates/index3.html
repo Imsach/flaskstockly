@@ -51,7 +51,6 @@
           <tr>
             <th>Title</th>
             <th>Publisher</th>
-            <th>link</th>
             <th>PublishTime</th>
             <th>relatedTickers</th>
             <th>Symbol</th>
@@ -62,10 +61,34 @@
           <tr>
             <td><a href="{{ row[2] }}" target="_blank">{{ row[0]}}</a></td>
             <td>{{ row[1] }}</td>
-            <td><a href="{{ row[2] }}" target="_blank">{{ row[2]}}</a></td>
             <td>{{ row[3] }}</td>
             <td>{{ row[4] }}</td>
             <td>{{ row[5] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <br>
+      <h1>Stock Mutualfund Holders</h1>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Holder</th>
+            <th>Shares</th>
+            <th>Date Reported</th>
+            <th>% Total Shares Held</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in mutualfundData %}
+          <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -88,7 +111,7 @@
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
 <script type="text/javascript">$(document).ready(function(){$('table').DataTable({
-    "pageLength": 15,
+    "pageLength": 5,
     order: [[1, 'desc']]
 });});</script> 
   <script>
