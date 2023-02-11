@@ -1,37 +1,72 @@
 {% extends 'base2.html' %}
 {% block content %}
-<title>Flaskstockly</title>
-<!-- <div class="wrapper">
-    <div class="typing"> -->
+<title>FlaskStockly</title>
+        <center><h2>--FlaskStockly--</h2></center>
         <div id="container" style="margin-top: 100px">
         <div id="loading2"><h1 style="text-align:center">Hang on tight! We are mathing...</h1></div>
-        <h4><p style="text-align:center"><button onclick="window.location.href='/run2'">=Trending Stocks=</button>____<button onclick="window.location.href='/run'", title="Click on View Dashboard once clicked on 'Run SPY 500'">=Run SPY500=</button>____<button onclick="window.location.href='/view'">=View Dashboard=</button><br>[ 'RUN' runs python code to pull all stock data from API ]<br>
-        >_> RUNScript >_> on 13 seconds interval it adds Random $tock from SPY500 list <br>[ ( API allows 5 requests/min for free) ]</p></h4><p style="text-align:center"><input id="txt" name="addstock" type="text" maxlength="5" size="5">
-        <input id='button' type="button" value="add stock" onclick="location.href='http://{{ ip }}/'+document.getElementById('txt').value"></p>
+        <div id="loading3"><h2 style="text-align:center">Hang on tight! click on view dashboard if it's loading forever...</h2></div>
+        <h4>
+            <p style="text-align:center">
+              <button id="trending-stocks" type="button">Trending Stocks</button>
+              <button id="run-spy-500" type="button">Run SPY 500</button>
+              <button id="view-dashboard" type="button">View Dashboard</button>
+            </p>
+        <p style="text-align:center">[ 'RUN' runs python code to pull all stock data from API ]<br>
+        >_> RUNScript >_> on 13 seconds interval it adds Random $tock from SPY500 list
+        <br>[ ( API allows 5 requests/min for free) ]</p></h4>
+        <p style="text-align:center">
+            <input id="txt" name="addstock" type="text" maxlength="5" size="7" >
+            <button id="add-stock" type="button">=Add Stock=</button>
+            <button id="view-stock" type="button">=View Stock News, Holders, Charts, etc.=</button>
+          </p>
         <h5><p style="text-align:center">Web app tabularizes Stocks data gathered from API & SPY500 list.<br>[ Plus, manually entered stocks at '/anystock' ex. http://{{ ip }}/TSLA ]<br> Web app is locally running on: {{ ip }}</p></h5>  
         
         </div>
 
     {% block scripts %} 
+    
+    <script>
+        const trendingStocksButton = document.getElementById("trending-stocks");
+        const runSpy500Button = document.getElementById("run-spy-500");
+        const viewDashboardButton = document.getElementById("view-dashboard");
+        const addStockButton = document.getElementById("add-stock");
+        const viewStockButton = document.getElementById("view-stock");
+        const input = document.getElementById("txt");
+      
+        trendingStocksButton.addEventListener("click", function() {
+          window.location.href = "/run2";
+          $('#loading2').show();
+        });
+      
+        runSpy500Button.addEventListener("click", function() {
+          window.location.href = "/run";
+          $('#loading3').show();
+        });
+      
+        viewDashboardButton.addEventListener("click", function() {
+          window.location.href = "/view";
+          $('#loading2').show();
+        });
+      
+        input.addEventListener("keyup", function() {
+          this.value = this.value.toUpperCase();
+        });
+      
+        addStockButton.addEventListener("click", function() {
+          location.href = `http://{{ ip }}/${input.value}`;
+        });
+      
+        viewStockButton.addEventListener("click", function() {
+          location.href = `http://{{ ip }}/stock_data?symbol=${input.value}`;
+        });
+    </script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         $(window).on('load', function () {
             $('#loading').hide();
+            $('#loading2').hide();
+            $('#loading3').hide();
             }) 
-        </script>
-        <script>
-            $('button[onclick^="window.location.href=\'/run\'"]').click(function(){
-                $('#loading2').show();
-            });
-            $('button[onclick^="window.location.href=\'/run2\'"]').click(function(){
-                $('#loading2').show();
-            });
-            $('button[onclick^="window.location.href=\'/view\'"]').click(function(){
-                $('#loading2').show();
-            });
-            $(window).on('load', function () {
-                $('#loading2').hide();
-            }); 
         </script>
     {% endblock %}
 {% endblock %}
