@@ -4,10 +4,11 @@ The web application built using Flask, allows the user to enter a stock symbol a
 
 The application also utilizes the yfinance library to gather stock information, in addition to the AlphaVantage API. With the yfinance library, users can easily gather financial data for a wide range of stocks and other securities. Furthermore, the application stores the retrieved stock information in an SQLite database, which allows the data to persist between uses of the application. Thus, by utilizing the yfinance library, the AlphaVantage API, and SQLite, this web application provides a comprehensive and versatile solution for gathering, analyzing, and visualizing stock information.
 
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/Axrrbg3YYGc/0.jpg)](http://www.youtube.com/watch?v=Axrrbg3YYGc "Get Insights into the Stock Market with FlaskStockly: A Comprehensive Flask Web App")
 
-**Make Sure to _Change_ API in _Secapi.py_ to your free API from alphavantage or 'demo'.** 
+**Make Sure to _Change_ 'API Key' in _Secapi.py_ to your free API from alphavantage or 'demo'.** 
 
-BASH command line needed to initiate the app
+Command line needed to initiate the app (For Windows open cmd.exe and enter the command line)
 
 ```bash
 python -m pip install -r requirements.txt
