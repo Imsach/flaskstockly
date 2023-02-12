@@ -10,16 +10,19 @@
               <button id="run-spy-500" type="button">Run SPY 500</button>
               <button id="view-dashboard" type="button">View Dashboard</button>
             </p>
-        <p style="text-align:center">[ 'RUN' runs python code to pull all stock data from API ]<br>
-        >_> RUNScript >_> on 13 seconds interval it adds Random $tock from SPY500 list
-        <br>[ ( API allows 5 requests/min for free) ]</p></h4>
+        <p style="text-align:center">[ The RUN script efficiently retrieves all stock data from the API, utilizing Python code. ]<br>
+              With its optimized 13-second interval, it seamlessly adds a random stock from the SPY500 list.
+              <br>[ (Note: the API allows for 5 free requests per minute) ]</p></h4>
+        
         <p style="text-align:center">
             <input id="txt" name="addstock" type="text" maxlength="5" size="7" >
             <button id="add-stock" type="button">=Add Stock=</button>
-            <button id="view-stock" type="button">=View Stock News, Holders, Charts, etc.=</button>
+            <button id="view-stock" type="button" title="View Stock News, Institution Holders, Charts, etc.">=$tock dashboard=</button>
           </p>
-        <h5><p style="text-align:center">Web app tabularizes Stocks data gathered from API & SPY500 list.<br>[ Plus, manually entered stocks at '/anystock' ex. http://{{ ip }}/TSLA ]<br> Web app is locally running on: {{ ip }}</p></h5>  
-        
+        <h5><p style="text-align:center">Organize and streamline your stock information with our user-friendly web application. With data gathered from the API and SPY500 list
+          <br>[ As well as the option to manually add stocks through the '/anystock' page (e.g. http://{{ ip }}/TSLA), ]
+          <br> you have the flexibility to track the stocks that matter most to you. Conveniently run locally at {{ ip }}
+          <br> Stay on top of the latest market trends with ease. :) </p></h5> 
         </div>
 
     {% block scripts %} 

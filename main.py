@@ -18,11 +18,8 @@ import requests
 import json
 from flask import Flask, request, render_template, redirect
 import pandas as pd
-import numpy as np
-from pandas import DataFrame
 import time
 from random import shuffle
-from datetime import datetime
 import secapi # To import API key from secapi
 import socket # Used to get the IP address of the user's machine.
 from bs4 import BeautifulSoup # Used for web scraping.
