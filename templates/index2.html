@@ -29,7 +29,12 @@
       {% for row in row_data %}
       <tr>
         {% for col, row_ in zip(column_names, row) %}
-        {% if col == 'Change' and row_|float < 0.0 %}
+
+        {% if col == 'Symbol' %}
+       
+        <td><a href="/stock_data?symbol={{ row_ }}" target="_blank">{{ row_ }}</a></td>
+
+        {% elif col == 'Change' and row_|float < 0.0 %}
        
         <td style ="background-color: rgb(205, 151, 151)"> {{ row_ }} </td>
 
