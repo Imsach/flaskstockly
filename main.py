@@ -34,6 +34,8 @@ import sqlite3
 from flask import jsonify
 import plotly.graph_objs as go
 import ta
+import threading
+
 
 
 
@@ -46,11 +48,56 @@ ip = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Create a socket object a
 ip.connect(("8.8.8.8", 80))  # Connect the socket object to port 80 on 8.8.8.8 
 ip = ip.getsockname()[0] # Get the IP address of the user's machine and assign it to ip variable (this is used in index page).  
 stockinfo = []
+isBrQexecuted = False
+isApiDemo = False
+
+if secapi.api_key == 'demo':
+    isApiDemo = True
+
+# Check if the database already exists
+if not os.path.exists("stock_data.db"):
+    # Connect to the database
+    conn = sqlite3.connect('stock_data.db', check_same_thread=False)
+    # Create the tables
+    conn.execute("CREATE TABLE stock_data (Date TEXT, Open REAL, High REAL, Low REAL, Close REAL, Adj Close REAL, Volume INTEGER, symbol TEXT, Dividends REAL, Stock Splits REAL, Capital Gains REAL, Avg_volume REAL, Upper Band REAL, Lower Band REAL)")
+    conn.execute("CREATE TABLE news_data (symbol TEXT, title TEXT, publisher TEXT, link TEXT, providerPublishTime TIMESTAMP, relatedTickers TEXT)")
+    conn.execute("CREATE TABLE mutualfund_data (Holder TEXT, Shares REAL, Date Reported TIMESTAMP, '% Out' REAL, Value REAL)")
+    conn.execute("CREATE TABLE majorholders_data (numbers TEXT, title TEXT, symbol TEXT)")
+    conn.execute("CREATE TABLE stocksplits_data (Date TEXT, 'Stock Splits' REAL, symbol TEXT)")
+    conn.execute("CREATE TABLE run_data (Symbol TEXT, Price REAL, Open REAL, High REAL, Low REAL, Volume INTEGER, 'Latest trading day' TEXT, 'Previous close' REAL, Change REAL, 'Change percent' REAL, 'Entered' TEXT)")
+    conn.commit()
+    
+else:
+    # Connect to the database
+    conn = sqlite3.connect('stock_data.db', check_same_thread=False)
+    cursor = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='stock_data'")
+    if cursor.fetchone():
+        conn.execute("DELETE FROM stock_data")
+        conn.commit()
+    cursorNews = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='news_data'")
+    if cursorNews.fetchone():
+        conn.execute("DELETE FROM news_data")
+        conn.commit()
+    cursorMutualfund = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='mutualfund_data'")
+    if cursorMutualfund.fetchone():
+        conn.execute("DELETE FROM mutualfund_data")
+        conn.commit()
+    cursorMajorHolders = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='majorholders_data'")
+    if cursorMajorHolders.fetchone():
+        conn.execute("DELETE FROM majorholders_data")
+        conn.commit()
+    cursorStockSplits = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='stocksplits_data'")
+    if cursorStockSplits.fetchone():
+        conn.execute("DELETE FROM stocksplits_data")
+        conn.commit()
+    cursorRun = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='run_data'")
+    if cursorRun.fetchone():
+            conn.commit()
 
 
 @app.route('/', methods=("POST", "GET"))
 def welcomePage():
-    return render_template('index.html', ip=ip)
+    return render_template('index.html', ip=ip, isApiDemo=isApiDemo)
 
 '''
 This code is part of a web application that allows users to enter a stock symbol
@@ -104,6 +151,11 @@ def hello_worldn():
     df = pd.DataFrame(data=stockinfo, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day',
                                                'Previous close', 'Change', 'Change percent', 'Entered'])
     df = (df.drop_duplicates(subset='Symbol', keep='last'))
+
+    queryRun = "SELECT * FROM run_data"
+    cursorRun = conn.execute(queryRun)
+    RunData = cursorRun.fetchall()
+    conn.commit()
     
     # fig = px.scatter(df, x="Price", y='Change', size="Change percent", color="Symbol", hover_name="Symbol", size_max=60)
     
@@ -114,7 +166,7 @@ def hello_worldn():
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), graphJSON=graphJSON, zip=zip, stockinfo=stockinfo, df=df, ip=ip)
+    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), graphJSON=graphJSON, zip=zip, stockinfo=stockinfo, df=df, ip=ip, RunData=RunData)
 
 '''
 This code is a route for the app that will run when the user visits the '/run' page. 
@@ -126,55 +178,64 @@ Finally, it redirects the user to the '/view' page.
 '''
 
 @app.route('/run', methods=("POST", "GET"))
-def hello_world5(stockinfo=stockinfo):
+
+def runQuery():
+    global isBrQexecuted
+    if not isBrQexecuted:
+        isBrQexecuted = True
+        thread = threading.Thread(target=backgroundRunQuery)
+        thread.start()
+        return redirect('/view')
+    else:
+        return redirect('/view')
+
+def backgroundRunQuery(stockinfo=stockinfo):
    
     pd2 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
-    first_table = pd2[0]
-   
-    df = first_table
+    df = pd2[0]
     stocks = df['Symbol'].values.tolist()
     shuffle(stocks)
     count = 0
     while count < 2:
         for stock in stocks:
-            
-            if stock not in stockinfo:
-                
-                print('First if')
-                api_key = secapi.api_key
-                u = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol='
-                x = stock + '&apikey=' + api_key
-                url = u + x
-                r = requests.get(url)
-                datas = r.json()
+            try:
+                if stock not in stockinfo:
+                    print(f"adding {stock}")
+                    api_key = secapi.api_key
+                    url = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=' + stock + '&apikey=' + api_key
+                    r = requests.get(url)
+                    datas = r.json()
 
-                df = pd.DataFrame(data=stockinfo,
-                                columns=['Symbol', 'Price', 'Open', 'High', 'Low', 'Volume', 'Latest trading day',
-                                        'Previous close', 'Change', 'Change percent', 'Entered'])
-                df = (df.drop_duplicates(subset='Symbol', keep='last'))
-              
-                if r.status_code == 200:
-                   
-                    t1 = time.localtime()
-                    t1 = time.strftime("%m/%d/%Y, %H:%M:%S", t1)
-                    for infos in datas:
-                        stockinfo.append([datas['Global Quote']['01. symbol'],  datas['Global Quote']['05. price'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent'], t1])
-                                    
-                    time.sleep(12.5)
-                
-                else:
-                
-                    time.sleep(random.randrange(70,120))
-            
-                    t1 = time.strftime("%m/%d/%Y, %H:%M:%S", time.localtime())
-                    for infos in datas:
-                        stockinfo.append([datas['Global Quote']['01. symbol'],  datas['Global Quote']['05. price'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent'], t1])
+                    df = pd.DataFrame(data=stockinfo,
+                                    columns=['Symbol', 'Price', 'Open', 'High', 'Low', 'Volume', 'Latest trading day',
+                                            'Previous close', 'Change', 'Change percent', 'Entered'])
                     
-            else:
+                    df = (df.drop_duplicates(subset='Symbol', keep='last'))
+                    df.to_sql('run_data', conn, if_exists='replace', index=False)
                 
-                pass
+                    if r.status_code == 200:
+                        t1 = time.strftime("%m/%d/%Y, %H:%M:%S", time.localtime())
+                        stockinfo.append([datas['Global Quote']['01. symbol'],  datas['Global Quote']['05. price'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent'], t1])
+                        sleepTime = 12.5
+                        while sleepTime > 0:
+                            print(f"Remaining sleep time: {sleepTime} seconds")
+                            time.sleep(0.5)
+                            sleepTime -= 0.5
+                    else:   
+                        sleepTime = random.randrange(70, 120)
+                        while sleepTime > 0:
+                            print(f"Remaining sleep time: {sleepTime} seconds")
+                            time.sleep(0.5)
+                            sleepTime -= 0.5
+                        t1 = time.strftime("%m/%d/%Y, %H:%M:%S", time.localtime())
+                        stockinfo.append([datas['Global Quote']['01. symbol'],  datas['Global Quote']['05. price'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent'], t1])
+                            
+                else:
+                    return redirect('/view')
+            except:
+                continue
             count += 1
-        return redirect('/view')
+    
 
 '''
 
@@ -251,45 +312,6 @@ def hhh():
     graph_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     return render_template('trend.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, graph_json=graph_json, values=values, df=df, ip=ip)
            
-
-# Check if the database already exists
-if not os.path.exists("stock_data.db"):
-    # Connect to the database
-    conn = sqlite3.connect('stock_data.db')
-    # Create the tables
-    conn.execute("CREATE TABLE stock_data (Date TEXT, Open REAL, High REAL, Low REAL, Close REAL, Adj Close REAL, Volume INTEGER, symbol TEXT, Dividends REAL, Stock Splits REAL, Capital Gains REAL, Avg_volume REAL, Upper Band REAL, Lower Band REAL)")
-    conn.execute("CREATE TABLE news_data (symbol TEXT, title TEXT, publisher TEXT, link TEXT, providerPublishTime TIMESTAMP, relatedTickers TEXT)")
-    conn.execute("CREATE TABLE mutualfund_data (Holder TEXT, Shares REAL, Date Reported TIMESTAMP, '% Out' REAL, Value REAL)")
-    conn.execute("CREATE TABLE majorholders_data (numbers TEXT, title TEXT, symbol TEXT)")
-    conn.execute("CREATE TABLE stocksplits_data (Date TEXT, 'Stock Splits' REAL, symbol TEXT)")
-    conn.commit()
-    
-else:
-    # Connect to the database
-    conn = sqlite3.connect('stock_data.db')
-    cursor = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='stock_data'")
-    if cursor.fetchone():
-        conn.execute("DELETE FROM stock_data")
-        conn.commit()
-    cursorNews = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='news_data'")
-    if cursorNews.fetchone():
-        conn.execute("DELETE FROM news_data")
-        conn.commit()
-    cursorMutualfund = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='mutualfund_data'")
-    if cursorMutualfund.fetchone():
-        conn.execute("DELETE FROM mutualfund_data")
-        conn.commit()
-    cursorMajorHolders = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='majorholders_data'")
-    if cursorMajorHolders.fetchone():
-        conn.execute("DELETE FROM majorholders_data")
-        conn.commit()
-    cursorStockSplits = conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='stocksplits_data'")
-    if cursorStockSplits.fetchone():
-        conn.execute("DELETE FROM stocksplits_data")
-        conn.commit()
-
-conn = sqlite3.connect('stock_data.db')
-
 image_HTML = 'static/volume_price.html'
 image_HTML2 = 'static/rsi.html'
 if os.path.exists(image_HTML):
@@ -379,18 +401,17 @@ def stock_data():
     cursorMajorHolders = conn.execute(queryMajorHolders)
     cursorStockSplits = conn.execute(queryStockSplits)
 
-
-
-
     data = cursor.fetchall()
     newsData = cursorNews.fetchall()
     mutualfundData = cursorMutualfund.fetchall()
     majorHolders = cursorMajorHolders.fetchall()
     stockSplits = cursorStockSplits.fetchall()
 
+    queryRun = "SELECT * FROM run_data"
+    cursorRun = conn.execute(queryRun)
+    RunData = cursorRun.fetchall()
     conn.close()
-    
-    return render_template("index3.html", data=data, newsData=newsData, mutualfundData=mutualfundData, majorHolders=majorHolders, stockSplits=stockSplits, symbol=symbol, chart_exists=chart_exists, chart_exists2=chart_exists2)
+    return render_template("index3.html", data=data, newsData=newsData, mutualfundData=mutualfundData, majorHolders=majorHolders, stockSplits=stockSplits, symbol=symbol, chart_exists=chart_exists, chart_exists2=chart_exists2, RunData=RunData)
 
 
 '''
