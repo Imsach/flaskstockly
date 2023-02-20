@@ -5,31 +5,68 @@
     <div class="container">
         <div>
           {% if symbol %}
-            <center><h3>__{{ symbol }}__</h3></center><br>
+          <h3 style="text-align:center;">{{ symbol }}</h3>
           {% else %}
-            <center><h5>__(o).(o)__</h5></center><br>
+          <h5 style="text-align:center;">(o).(o)</h5>
           {% endif %}
 
-          <h1>Stock Data</h1></div>
-    <form action="/stock_data" method="get">
-        <label for="symbol">Enter Stock Symbol:</label>
-        <input type="text" id="symbol" name="symbol" onkeyup="this.value=this.value.toUpperCase();">
-        <input type="submit" value="Submit">
-    </form>
+          <h1 style="text-align:center;">Stock Dashboard</h1></div>
+          <form action="/stock_data" method="get">
+            <label for="symbol">Enter Stock Symbol:</label>
+            <input type="text" id="symbol" name="symbol" onkeyup="this.value=this.value.toUpperCase();">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="sdate" name="sdate" value="">
+            <label for="start_date">End Date:</label>
+            <input type="date" id="edate" name="edate" value="">
+            <input type="submit" value="Submit">
+        </form>
     <br>
-    <center><h2>Volume/Price Chart</h2></center>
-    <div style="display: flex;">
+    <!-- <h2 style="text-align:center;">Volume/Price Chart</h2> -->
+    <div class="chart-container">
     {% if chart_exists %}
-        <iframe src="{{ url_for('static', filename='volume_price.html') }}" style="width: 100%; height: 400px; border: none;"></iframe>
+        <iframe src="{{ url_for('static', filename='volume_price.html') }}" style="width: 100%; height: 500px; border: 10px; padding: 0;"></iframe>
     {% else %}
-        <h5>Chart will show here after you enter symbol.</h5>
-    {% endif %}</div>
-    <div style="display: flex;">
+        <h5 style="text-align:center;">Chart will show here after you enter symbol.</h5>
+    {% endif %}
+    </div>
+    <!-- <h2 style="text-align:center;">RSI Chart</h2> -->
+    <div class="chart-container">
       {% if chart_exists2 %}
-          <iframe src="{{ url_for('static', filename='rsi.html') }}" style="width: 100%; height: 300px; border: none; padding: 0;"></iframe>
+          <iframe src="{{ url_for('static', filename='rsi.html') }}" style="width: 100%; height: 350px; border: none; padding: 0;"></iframe>
       {% else %}
-          <h5>Chart will show here after you enter symbol.</h5>
-      {% endif %}</div>
+          <h5 style="text-align:center;">RSI Chart will show here after you enter symbol.</h5>
+      {% endif %}
+    </div>
+    <!-- <h2 style="text-align:center;">ATR Chart</h2> -->
+    <div class="chart-container">
+        {% if chart_exists3 %}
+            <iframe src="{{ url_for('static', filename='Atr.html') }}" style="width: 100%; height: 350px; border: none; padding: 0;"></iframe>
+        {% else %}
+            <h5 style="text-align:center;">ATR Chart will show here after you enter symbol.</h5>
+        {% endif %}
+    </div>
+    <center><h1>Stock News</h1></center>
+    <table>
+      <thead>
+        <tr>
+          <th>PublishTime</th>
+          <th>Title</th>
+          <th>Publisher</th>
+          <th>relatedTickers</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in newsData %}
+        <tr>
+          <td>{{ row[3] }}</td>
+          <td><a href="{{ row[2] }}" target="_blank">{{ row[0]}}</a></td>
+          <td>{{ row[1] }}</td>
+          <td>{{ row[4] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <br>
       <table>
         <thead>
           <tr>
@@ -50,29 +87,6 @@
             <td>{{ row[3] }}</td>
             <td>{{ row[4] }}</td>
             <td>{{ row[5] }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <br>
-      <center><h1>Stock News</h1></center>
-
-      <table>
-        <thead>
-          <tr>
-            <th>PublishTime</th>
-            <th>Title</th>
-            <th>Publisher</th>
-            <th>relatedTickers</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in newsData %}
-          <tr>
-            <td>{{ row[3] }}</td>
-            <td><a href="{{ row[2] }}" target="_blank">{{ row[0]}}</a></td>
-            <td>{{ row[1] }}</td>
-            <td>{{ row[4] }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -162,7 +176,7 @@
         <tbody>
           {% for row in RunData %}
           <tr>
-            <td><a href="/stock_data/symbol?={{ row[0] }}" target="_blank">{{ row[0]}}</a></td>
+            <td><a href="/stock_data?symbol={{ row[0] }}" target="_blank">{{ row[0]}}</a></td>
             <td>{{ row[1] }}</td>
             <td>{{ row[2] }}</td>
             <td>{{ row[3] }}</td>
@@ -189,12 +203,8 @@
   <script>
     $(window).on('load', function () {
       $('#loading').hide();
+      $('#loading2').hide();
     }) 
   </script>
-  <script>
-    $(window).on('load', function () {
-        $('#loading2').hide();
-    }); 
-</script>
     {% endblock %}
 {% endblock %}

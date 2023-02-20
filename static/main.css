@@ -1,12 +1,55 @@
-@media screen and (max-width: 600px) {
-  body {
-      font-size: 16px;
-  }
-  h1, h2 {
-      font-size: 18px;
+/* Common styles */
+html,
+body {
+  height: auto;
+}
+
+body {
+  background: #111111;
+  font-family: "Merriweather", serif;
+  display: block;
+  justify-content: space-evenly;
+  color: #acbad5;
+}
+
+.container {
+  margin: 10px 15px;
+}
+
+h4,
+h5 {
+  font-weight: 300;
+  color: rgb(112, 120, 161);
+}
+
+p {
+  font-size: 20px;
+  line-height: 26px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Media query for smaller screens */
+
+@media (max-width: 600px) {
+  label[for='symbol'], label[for="sdate"], label[for="edate"] {
+    display: block;
+    margin-bottom: 5px;
   }
 }
 
+@media screen and (max-width: 600px) {
+  body {
+    font-size: 16px;
+  }
+  h1,
+  h2 {
+    font-size: 18px;
+  }
+}
+
+/* Loading overlay */
 #loading {
   position: fixed;
   display: flex;
@@ -25,52 +68,52 @@
   z-index: 100;
 }
 
-table {
-    font-family: arial, sans-serif;
-    border-collapse: collapse;
-    width: 100%;
-    background-color: #B3E8E5;
+.chart-container {
+  width: 100%;
 }
 
-td, th {
-    border: 0.5px solid #2c2736;
-    text-align: centre;
-    padding: 5px;
+@media only screen and (max-width: 600px) {
+  .chart-container {
+    width: 110%;
+    margin: 0;
+  }
 }
-input {
-  background-color: #5c8cd3;
-  border: none;
-  color: black;
-  padding: 5px 5px;
+
+
+/* Table styles */
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+  background-color: #b3e8e5;
+}
+
+td,
+th {
+  border: 0.5px solid #2c2736;
   text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 18px;
-  border-radius: 2px;
-  transition-duration: 0.4s
-}
-input:hover {
-  background-color: #e2d7d4; 
-  color: rgb(24, 28, 49);
+  padding: 5px;
 }
 
 td:nth-child(1) {
-    background-color: #dfdfdf;
-    font-weight: bold;
-    font-size: 0.9em;
+  background-color: #dfdfdf;
+  font-weight: bold;
+  font-size: 0.9em;
 }
 
-td:hover {background-color: #aabbd6;}
+td:hover {
+  background-color: #aabbd6;
+}
 
 th {
-    background-color: #1d2425;
-    font-size: 0.9em;
+  background-color: #1d2425;
+  font-size: 0.9em;
 }
 
 td {
-    color: #1d2425;
-    background-color: #f7f8fa;
-    font-size: 0.9em;
+  color: #1d2425;
+  background-color: #f7f8fa;
+  font-size: 0.9em;
 }
 
 select {
@@ -85,73 +128,45 @@ select {
   color: #294e85;
 }
 
-footer {
-   font-family: 'Merriweather', serif;
-   position:relative;
-   left:0px;
-   bottom:0px;
-   height:50px;
-   width:100%;
-   background: transparent;
+/* Form elements */
+input,
+button {
+  background-color: #5c8cd3;
+  border: none;
+  color: black;
+  padding: 5px 5px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 18px;
+  border-radius: 2px;
+  transition-duration: 0.4s;
 }
 
-a { color: rgb(88, 45, 174); text-decoration: none; text-transform:capitalize }
-
-html, body {
-    height:auto;
-  }
-  
-body {
-    background: whitesmoke;
-    /* background: linear-gradient(-45deg, #0d1117, #060c30, #1a0921, #0d1117); */
-	  background-size: 400% 400%;
-    font-family: 'Merriweather', serif;
-    display:block;
-    justify-content:space-evenly;
-    color: #acbad5;
-  }
-  
-.container {
-    margin: 10px 15px;
-    /* border: 0.5px solid #201a2f; */
-  }
-  
-h4, h5 {
-    font-weight: 300;
-    color: rgb(112, 120, 161);
-  }
-  
-p {
-    font-size: 20px;
-    line-height: 26px;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    hyphens: auto;
-  }
-
-label {
-  font-size: 18px;
-  color: #3c65a3;
-  }
-
-button {
-    background-color: #5c8cd3;
-    border: none;
-    color: black;
-    padding: 5px 5px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 20px;
-    border-radius: 2px;
-    transition-duration: 0.4s
-  }
-
+input:hover,
 button:hover {
-    background-color: #b4c6e0;
-    color: #142237;
-  }
+  background-color: #e2d7d4;
+  color: rgb(24, 28, 49);
+}
 
 label {
   font-size: 20px;
+  color: #3c65a3;
+}
+
+/* Footer */
+footer {
+  font-family: "Merriweather", serif;
+  position: relative;
+  left: 0px;
+  bottom: 0px;
+  height: 50px;
+  width: 100%;
+  background: transparent;
+}
+
+a {
+  color: rgb(88, 45, 174);
+  text-decoration: none;
+  text-transform: capitalize;
 }

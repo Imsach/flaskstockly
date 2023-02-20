@@ -50,6 +50,7 @@ ip = ip.getsockname()[0] # Get the IP address of the user's machine and assign i
 stockinfo = []
 isBrQexecuted = False
 isApiDemo = False
+default_start_date = '2022-02-01'
 
 if secapi.api_key == 'demo':
     isApiDemo = True
@@ -59,7 +60,7 @@ if not os.path.exists("stock_data.db"):
     # Connect to the database
     conn = sqlite3.connect('stock_data.db', check_same_thread=False)
     # Create the tables
-    conn.execute("CREATE TABLE stock_data (Date TEXT, Open REAL, High REAL, Low REAL, Close REAL, Adj Close REAL, Volume INTEGER, symbol TEXT, Dividends REAL, Stock Splits REAL, Capital Gains REAL, Avg_volume REAL, Upper Band REAL, Lower Band REAL)")
+    conn.execute("CREATE TABLE stock_data (Date TEXT, Open REAL, High REAL, Low REAL, Close REAL, Adj Close REAL, Volume INTEGER, symbol TEXT, Dividends REAL, Stock Splits REAL, Capital Gains REAL, Avg_volume REAL, Sma44 REAL, Sma200 REAL, Atr REAL)")
     conn.execute("CREATE TABLE news_data (symbol TEXT, title TEXT, publisher TEXT, link TEXT, providerPublishTime TIMESTAMP, relatedTickers TEXT)")
     conn.execute("CREATE TABLE mutualfund_data (Holder TEXT, Shares REAL, Date Reported TIMESTAMP, '% Out' REAL, Value REAL)")
     conn.execute("CREATE TABLE majorholders_data (numbers TEXT, title TEXT, symbol TEXT)")
@@ -97,7 +98,7 @@ else:
 
 @app.route('/', methods=("POST", "GET"))
 def welcomePage():
-    return render_template('index.html', ip=ip, isApiDemo=isApiDemo)
+    return redirect('/view')
 
 '''
 This code is part of a web application that allows users to enter a stock symbol
@@ -166,7 +167,7 @@ def hello_worldn():
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), graphJSON=graphJSON, zip=zip, stockinfo=stockinfo, df=df, ip=ip, RunData=RunData)
+    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), graphJSON=graphJSON, zip=zip, stockinfo=stockinfo, df=df, ip=ip, isApiDemo=isApiDemo, RunData=RunData)
 
 '''
 This code is a route for the app that will run when the user visits the '/run' page. 
@@ -314,9 +315,14 @@ def hhh():
            
 image_HTML = 'static/volume_price.html'
 image_HTML2 = 'static/rsi.html'
+image_HTML3 = 'static/atr.html'
 if os.path.exists(image_HTML):
-    os.remove(image_HTML)
-    os.remove(image_HTML2)
+    try:
+        os.remove(image_HTML)
+        os.remove(image_HTML2)
+        os.remove(image_HTML3)
+    except:
+        pass
 
 # Route for retrieving data from the database
 @app.route('/stock_data', methods=['GET'])
@@ -324,6 +330,9 @@ def stock_data():
     conn = sqlite3.connect('stock_data.db')
     cursor = conn.cursor()
     symbol = request.args.get('symbol')
+    start_date = request.args.get('sdate')
+    if not start_date:
+        start_date = default_start_date
     query = "SELECT * FROM stock_data"
     queryNews = "SELECT * FROM news_data"
     queryMutualfund = "SELECT * FROM mutualfund_data"
@@ -333,27 +342,49 @@ def stock_data():
     if symbol:
         query += f" WHERE symbol='{symbol}'"
         stock = yf.Ticker(symbol)
-        end_date = dt.datetime.now().strftime('%Y-%m-%d')
-        data = stock.history(start='2022-11-01',end=end_date)
+        default_end_date = dt.datetime.now().strftime('%Y-%m-%d')
+        end_date = request.args.get('edate')
+        if not end_date:
+            end_date = default_end_date
+        data = stock.history(start=start_date,end=end_date)
         data.reset_index(level=0, inplace=True)
+        data.drop(["Dividends", "Stock Splits", "Capital Gains"], axis=1, inplace=True, errors='ignore')
         data["Date"] = data["Date"].apply(lambda x: x.strftime('%Y-%m-%d'))
         data['Avg_volume'] = data['Volume'].rolling(window=14).mean()
         data["Rsi"] = ta.momentum.RSIIndicator(data["Close"]).rsi()
-        data.drop(["Dividends", "Stock Splits", "Capital Gains"], axis=1, inplace=True, errors='ignore')
+        data["Sma44"] = ta.trend.sma_indicator(data["Close"], window=44, fillna=False)
+        data["Sma200"] = ta.trend.sma_indicator(data["Close"], window=200, fillna=False)
+        
         # Plot the data using Plotly
-        fig1 = go.Scatter(x=data['Date'], y=data['Volume'], mode='lines+markers', name='Volume', line=dict(color='white'))
+        # fig1 = go.Scatter(x=data['Date'], y=data['Volume'], mode='lines', opacity=0.3, name='Volume', line=dict(color='white'))
+        fig1 = go.Bar(x=data['Date'], y=data['Volume'], marker_color="DarkGrey", opacity=0.2, name='Volume')
         fig2 = go.Scatter(x=data['Date'], y=data['Close'], mode='lines', name='Price', yaxis='y2', line=dict(color='red'))
         fig3 = go.Scatter(x=data['Date'], y=data['Avg_volume'], mode='lines', opacity=0.4, name='AvgVolume', line=dict(color='yellow', dash='dash'))
-        fig4 = go.Scatter(x=data['Date'], y=data['Rsi'], mode='lines+markers', name='RSI', line=dict(color='cyan'))
-        fig5 = go.Scatter(x=data['Date'], y=[20]*len(data['Date']), mode='lines', name='RSI20', line=dict(color='white', dash='dash'))
-        fig6 = go.Scatter(x=data['Date'], y=[80]*len(data['Date']), mode='lines', name='RSI80', line=dict(color='red', dash='dash'))
+        fig4 = go.Scatter(x=data['Date'], y=data['Sma44'], mode='lines', opacity=0.4, name='SMA 44', yaxis='y2', line=dict(color='grey', dash='dash'))
+        fig5 = go.Scatter(x=data['Date'], y=data['Sma200'], mode='lines', opacity=0.5, name='SMA 200', yaxis='y2', line=dict(color='cyan', dash='dash'))
+        fig6 = go.Scatter(x=data['Date'], y=data['Rsi'], mode='lines', name='RSI', line=dict(color='yellow'))
+        fig7 = go.Scatter(x=data['Date'], y=[20]*len(data['Date']), mode='lines', name='RSI20', line=dict(color='green', dash='dash'))
+        fig8 = go.Scatter(x=data['Date'], y=[80]*len(data['Date']), mode='lines', name='RSI80', line=dict(color='red', dash='dash'))
+        
 
         layout = go.Layout(title='Stock Volume and Price - ' + symbol, template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='Volume (in millions)'), yaxis2=dict(title='Price', overlaying='y', side='right'))
-        layout2 = go.Layout(template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='RSI', overlaying='y', side='right'))
-        fig = go.Figure(data=[fig1, fig2, fig3], layout=layout)
+        layout2 = go.Layout(template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='RSI'), yaxis2=dict(title='Price', overlaying='y', side='right'))
+        
+        fig = go.Figure(data=[fig1, fig2, fig3, fig4, fig5], layout=layout)
         fig.write_html(image_HTML)
-        fig2 = go.Figure(data=[fig4, fig5, fig6], layout=layout2)
-        fig2.write_html(image_HTML2)
+        fig_2 = go.Figure(data=[fig2, fig6, fig7, fig8], layout=layout2)
+        fig_2.write_html(image_HTML2)
+        try:
+            atr = ta.volatility.AverageTrueRange(data["High"], data["Low"], data["Close"], window = 14, fillna=False)
+            data["Atr"] = pd.Series(atr.average_true_range(), index=data.index[14:])
+            fig9 = go.Scatter(x=data['Date'], y=data['Atr'], mode='lines', name='Atr', line=dict(color='blue'))
+            layout3 = go.Layout(template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='Average True Range'), yaxis2=dict(title='Price', overlaying='y', side='right'))
+            fig_3 = go.Figure(data=[fig9, fig2], layout=layout3)
+            fig_3.write_html(image_HTML3)
+        except IndexError as e:
+            errorMessage = "<center><h2>ToO short...</h2>\n<h2>Widen Date range between start date and end date a little bit.</h2>\n<h3><a href='/stock_data?symbol=' target='_self'>Go back</a></h3></center>"
+            return str(errorMessage)
+
         # Adding data to the database
         data['symbol'] = stock.ticker
         print(data)
@@ -395,6 +426,7 @@ def stock_data():
 
     chart_exists = os.path.exists('static/volume_price.html')
     chart_exists2 = os.path.exists('static/rsi.html')
+    chart_exists3 = os.path.exists('static/Atr.html')
     cursor = conn.execute(query)
     cursorNews = conn.execute(queryNews)
     cursorMutualfund = conn.execute(queryMutualfund)
@@ -411,7 +443,7 @@ def stock_data():
     cursorRun = conn.execute(queryRun)
     RunData = cursorRun.fetchall()
     conn.close()
-    return render_template("index3.html", data=data, newsData=newsData, mutualfundData=mutualfundData, majorHolders=majorHolders, stockSplits=stockSplits, symbol=symbol, chart_exists=chart_exists, chart_exists2=chart_exists2, RunData=RunData)
+    return render_template("index3.html", data=data, newsData=newsData, mutualfundData=mutualfundData, majorHolders=majorHolders, stockSplits=stockSplits, symbol=symbol, chart_exists=chart_exists, chart_exists2=chart_exists2, chart_exists3=chart_exists3, default_start_date=default_start_date, RunData=RunData)
 
 
 '''

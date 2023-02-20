@@ -1,12 +1,23 @@
 {% extends "base2.html" %}
 {% block content %}
-<title>Stock Dashboard</title>
+<title>FlaskStockly</title>
 <div id="loading2"><h1 style="text-align:center; margin-top: 100px">Loading...</h1></div>
-<h4><p style="text-align:center"><button onclick="window.location.href='/run2'">=Trending Stocks=</button>____
-  <button onclick="window.location.href='/run'", title="Click on Refresh Dashboard once clicked on 'Run SPY 500'">=Run SPY500=</button>____
-  <button onclick="window.location.href='/view'">=Refresh Dashboard=</button>___<button onclick="window.location.href='/stock_data'", title="View Stock News, Institution Holders, Charts, etc.">=$tock dashboard=</button>___
-  <input id="txt" name="addstock" type="text" maxlength="5" size="5">
-<input id='button' type="button" value="add stock" onclick="location.href='http://{{ip}}/'+document.getElementById('txt').value"></p>
+<div id="loading3"><h2 style="text-align:center">Hang on tight! click on view dashboard if it's loading forever...</h2></div>
+<div>
+  {% if isApiDemo %}
+    <center><h3>__Api key is set to 'demo'; App may not work as expected__</h3></center><br>
+  {% else %}
+    <center><h5>__(o).(o)__</h5></center><br>
+  {% endif %}
+</div>
+<h4><p style="text-align:center">
+  <button id="trending-stocks" type="button">Trending Stocks</button>
+  <button id="run-spy-500" type="button">Run SPY 500</button>
+  <button id="view-dashboard" type="button">View Dashboard</button>
+  <input id="txt" name="addstock" type="text" maxlength="5" size="7" >
+  <button id="add-stock" type="button">=Add Stock=</button>
+  <button id="view-stock" type="button" title="View Stock News, Institution Holders, Charts, etc.">=$tock dashboard=</button>
+</p>
 
 <meta http-equiv="refresh" content="35; URL=/view">
 <div id="chart" class="chart"></div>
@@ -57,11 +68,14 @@
 
   </table>  
 
-  <h4><p style="text-align:center">Stocks in table: <strong>{% print(df.shape[0]) %}</strong> out of SPY500. <br>
-    [ Plus, manually entered stocks at <b>'/anystock'</b> ex. http://{{ip}}/{% print(df.iloc(0)[0, 0]) %} ]<br>
-    [ 'RUN' runs python code to pull all stock data from API ] <br>
-     >_> RUNScript >_> on 13 seconds interval it adds Random $tock from SPY500 list <br>
-    [ ( API allows 5 requests/min for free) ]</p></h4>
+  <h5><p style="text-align:center">Organize and streamline your stock information with our user-friendly web application. With data gathered from the API and SPY500 list
+    <br>[ As well as the option to manually add stocks through the '/anystock' page (e.g. http://{{ip}}/{% print(df.iloc(0)[0, 0]) %}, ]
+    <br> you have the flexibility to track the stocks that matter most to you. Conveniently run locally at {{ ip }}
+    <br> Stay on top of the latest market trends with ease. :) </p></h5>
+
+    <p style="text-align:center">[ The RUN script efficiently retrieves all stock data from the API, utilizing Python code. ]<br>
+      With its optimized 13-second interval, it seamlessly adds a random stock from the SPY500 list.
+      <br>[ (Note: the API allows for 5 free requests per minute) ]</p></h4>
 
   {% block scripts %} 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -72,32 +86,51 @@
     order: [[10, 'desc']]
 });});</script> 
   <script>
-    $('button[onclick^="window.location.href=\'/run\'"]').click(function(){
-        $('#loading2').show();
+    const trendingStocksButton = document.getElementById("trending-stocks");
+    const runSpy500Button = document.getElementById("run-spy-500");
+    const viewDashboardButton = document.getElementById("view-dashboard");
+    const addStockButton = document.getElementById("add-stock");
+    const viewStockButton = document.getElementById("view-stock");
+    const input = document.getElementById("txt");
+  
+    trendingStocksButton.addEventListener("click", function() {
+      window.location.href = "/run2";
+      $('#loading2').show();
     });
-    $('button[onclick^="window.location.href=\'/run2\'"]').click(function(){
-        $('#loading2').show();
+  
+    runSpy500Button.addEventListener("click", function() {
+      window.location.href = "/run";
+      $('#loading3').show();
     });
-    $(window).on('load', function () {
-        $('#loading2').hide();
-    }); 
+  
+    viewDashboardButton.addEventListener("click", function() {
+      window.location.href = "/view";
+      $('#loading2').show();
+    });
+  
+    input.addEventListener("keyup", function() {
+      this.value = this.value.toUpperCase();
+    });
+  
+    addStockButton.addEventListener("click", function() {
+      location.href = `http://{{ ip }}/${input.value}`;
+    });
+  
+    viewStockButton.addEventListener("click", function() {
+      location.href = `http://{{ ip }}/stock_data?symbol=${input.value}`;
+    });
 </script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script type="text/javascript">
       var graphs = {{graphJSON | safe}};
       Plotly.plot('chart',graphs,{});        
   </script>
-  <script>
-    $(window).on('load', function () {
-      $('#loading').hide();
-    }) 
-  </script>
-  <script>
-    $(document).ready(function(){
-      $("button").click(function(){
-        $(this).hide();
-      });
-    });
-    </script>
+    <script>
+      $(window).on('load', function () {
+          $('#loading').hide();
+          $('#loading2').hide();
+          $('#loading3').hide();
+          }) 
+      </script>
     {% endblock %}
 {% endblock %}
