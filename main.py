@@ -51,6 +51,7 @@ stockinfo = []
 isBrQexecuted = False
 isApiDemo = False
 enableRefresh = True
+enableRefresh2 = True
 default_start_date = '2022-02-01'
 
 if secapi.api_key == 'demo':
@@ -106,6 +107,12 @@ def refresh():
     global enableRefresh
     enableRefresh = not enableRefresh
     return redirect('/view')
+
+@app.route('/refresh2', methods=("POST", "GET"))
+def refresh2():
+    global enableRefresh2
+    enableRefresh2 = not enableRefresh2
+    return redirect('/run2')
 
 '''
 This code is part of a web application that allows users to enter a stock symbol
@@ -336,6 +343,7 @@ which is converted into a JSON object and rendered in the template 'trend.html'.
 
 @app.route('/run2', methods=("POST", "GET"))
 def hhh():
+    global enableRefresh2
     options = Options()
     options.headless = True
     options.add_argument("--window-size=1920,1200")
@@ -396,7 +404,7 @@ def hhh():
     fig.update_xaxes(title_font_color="#3770ab", gridcolor='#202436')
     fig.update_yaxes(title_font_color="#3770ab", gridcolor='#202436')
     graph_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    return render_template('trend.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, graph_json=graph_json, values=values, df=df, ip=ip)
+    return render_template('trend.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, graph_json=graph_json, values=values, df=df, ip=ip, enableRefresh2=enableRefresh2)
            
 image_HTML = 'static/volume_price.html'
 image_HTML2 = 'static/rsi.html'
@@ -443,7 +451,8 @@ def stock_data():
         # Plot the data using Plotly
         # fig1 = go.Scatter(x=data['Date'], y=data['Volume'], mode='lines', opacity=0.3, name='Volume', line=dict(color='white'))
         fig1 = go.Bar(x=data['Date'], y=data['Volume'], marker_color="DarkGrey", opacity=0.2, name='Volume')
-        fig2 = go.Scatter(x=data['Date'], y=data['Close'], mode='lines', name='Price', yaxis='y2', line=dict(color='red'))
+        fig2 = go.Scatter(x=data['Date'], y=data['Close'], mode='lines+markers', marker=dict(symbol='circle', size=2, color='yellow'), name='Price', yaxis='y2', line=dict(color='red'))
+        figx = go.Candlestick(x=data['Date'], open=data['Open'], high=data['High'], low=data['Low'], close=data['Close'], line=dict(width=10), opacity=0.4, name='Price', yaxis='y')
         fig3 = go.Scatter(x=data['Date'], y=data['Avg_volume'], mode='lines', opacity=0.4, name='AvgVolume', line=dict(color='yellow', dash='dash'))
         fig4 = go.Scatter(x=data['Date'], y=data['Sma44'], mode='lines', opacity=0.4, name='SMA 44', yaxis='y2', line=dict(color='grey', dash='dash'))
         fig5 = go.Scatter(x=data['Date'], y=data['Sma200'], mode='lines', opacity=0.5, name='SMA 200', yaxis='y2', line=dict(color='cyan', dash='dash'))
@@ -452,10 +461,10 @@ def stock_data():
         fig8 = go.Scatter(x=data['Date'], y=[80]*len(data['Date']), mode='lines', name='RSI80', line=dict(color='red', dash='dash'))
         
 
-        layout = go.Layout(title='Stock Volume and Price - ' + symbol, template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='Volume (in millions)'), yaxis2=dict(title='Price', overlaying='y', side='right'))
-        layout2 = go.Layout(template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='RSI'), yaxis2=dict(title='Price', overlaying='y', side='right'))
+        layout = go.Layout(title='Stock Volume and Price - ' + symbol, template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='Volume (in millions)'), yaxis2=dict(title='Price', overlaying='y', side='right', position=0.95), margin=go.layout.Margin(l=0, r=0, b=0, t=26))
+        layout2 = go.Layout(template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='RSI'), yaxis2=dict(title='Price', overlaying='y', side='right'), margin=go.layout.Margin(l=0, r=0, b=0, t=0))
         
-        fig = go.Figure(data=[fig1, fig2, fig3, fig4, fig5], layout=layout)
+        fig = go.Figure(data=[fig1, fig2, figx, fig3, fig4, fig5], layout=layout)
         fig.write_html(image_HTML)
         fig_2 = go.Figure(data=[fig2, fig6, fig7, fig8], layout=layout2)
         fig_2.write_html(image_HTML2)
@@ -463,7 +472,7 @@ def stock_data():
             atr = ta.volatility.AverageTrueRange(data["High"], data["Low"], data["Close"], window = 14, fillna=False)
             data["Atr"] = pd.Series(atr.average_true_range(), index=data.index[14:])
             fig9 = go.Scatter(x=data['Date'], y=data['Atr'], mode='lines', name='Atr', line=dict(color='blue'))
-            layout3 = go.Layout(template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='Average True Range'), yaxis2=dict(title='Price', overlaying='y', side='right'))
+            layout3 = go.Layout(template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='Average True Range'), yaxis2=dict(title='Price', overlaying='y', side='right'),  margin=go.layout.Margin(l=0, r=0, b=0, t=0))
             fig_3 = go.Figure(data=[fig9, fig2], layout=layout3)
             fig_3.write_html(image_HTML3)
         except IndexError as e:

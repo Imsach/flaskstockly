@@ -4,12 +4,15 @@
 <title>Trend Dashboard</title>
 <!-- <section class="container"> -->
 <div id="loading2"><h1 style="text-align:center; margin-top: 100px">Working on it...</h1></div>
+<meta http-equiv="refresh" content="{% if enableRefresh2 %}30{% else %}300{% endif %}; URL=/run2">
 <h4><p style="text-align:center">__<button onclick="window.location.href='/view'">=SPY500=</button>____<button onclick="window.location.href='/run2'">=Refresh Dashboard=</button>___<input id="txt" name="addstock" type="text" maxlength="5" size="5">
 <input id='button' type="button" value="add stock" onclick="location.href='http://{{ ip }}/'+document.getElementById('txt').value"></p>
 <div id="chart" class="chart"></div>
-<meta http-equiv="refresh" content="100; URL=/run2">
-
-
+<form method="post" action="/refresh2">
+  <input type="checkbox" name="enableRefresh2" {% if enableRefresh2 %}checked{% endif %}> Auto-refresh 
+  <input type="submit" value="Save">
+</form>
+  <div class="tabley"> 
   <table>
     <thead>
 
@@ -44,7 +47,8 @@
 
     </tbody>
 
-  </table>
+  </table></div>
+
    
     {% block scripts %} 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
