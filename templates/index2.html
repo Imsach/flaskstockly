@@ -24,12 +24,14 @@
     <label style="display:inline-block;"><input type="checkbox" name="lists" value="Rus1000"> Rus1000</label>
     <input type="submit" title="Check one or all three boxes :) grab coffee! It'll take a while" value="Run">
     </form> 
-  </center></p>
+  </center></p></h4>
 <div id="chart" class="chart"></div>
 <form method="post" action="/refresh">
   <input type="checkbox" name="enableRefresh" {% if enableRefresh %}checked{% endif %}> Auto-refresh 
   <input type="submit" value="Save">
 </form>
+  <div>
+    {% if stockinfo %}
   <div class="tabley">  
   <table>
     <thead>
@@ -76,15 +78,62 @@
     </tbody>
 
   </table></div>
-
+  {% else %}
+  <div class="tabley">  
+    <table>
+      <thead>
+  
+        <tr>
+          {% for col in column_names2 %}
+          <th>
+          
+            {{col}}
+           
+          </th>
+          {% endfor %}
+        </tr>
+  
+      </thead>
+      <tbody>
+        {% for row in row_data2 %}
+        <tr>
+          {% for col, row_ in zip(column_names2, row) %}
+  
+          {% if col == 'Symbol' %}
+         
+          <td><a href="/stock_data?symbol={{ row_ }}" target="_blank">{{ row_ }}</a></td>
+  
+          {% elif col == 'Change' and row_|float < 0.0 %}
+         
+          <td style ="background-color: rgb(205, 151, 151)"> {{ row_ }} </td>
+  
+          {% elif col == "Change percent" and row_|float > 3.0 %}
+  
+          <td style ="background-color: #eff3f8"> {{ row_ }} </td>
+  
+          {% else %}
+         
+          <td> {{ row_ }} </td>
+        
+          {% endif %}
+          {% endfor %} 
+        </tr>
+        {% endfor %}
+  
+  
+      </tbody>
+  
+    </table></div>
+  {% endif %}</div>
   <h5><p style="text-align:center">Organize and streamline your stock information with our user-friendly web application. With data gathered from the API and SPY500 list
     <br>[ As well as the option to manually add stocks through the '/anystock' page (e.g. http://{{ip}}/{% print(df.iloc(0)[0, 0]) %}) ]
     <br> you have the flexibility to track the stocks that matter most to you. Conveniently run locally at {{ ip }}
-    <br> Stay on top of the latest market trends with ease. :) </p></h5>
+    <br> Stay on top of the latest market trends with ease. :) </p>
 
     <p style="text-align:center">[ The RUN script efficiently retrieves all stock data from the API, utilizing Python code. ]<br>
       With its optimized 13-second interval, it seamlessly adds a random stock from the SPY500 list.
-      <br>[ (Note: the API allows for 5 free requests per minute) ]</p></h4>
+      <br>[ (Note: the API allows for 5 free requests per minute) ]</p></h5>
+      
 
   {% block scripts %} 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -124,10 +173,17 @@
     });
 </script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  {% if stockinfo %}
   <script type="text/javascript">
-      var graphs = {{graphJSON | safe}};
-      Plotly.plot('chart',graphs,{});        
-  </script>
+    var graphs = {{graphJSON | safe}};
+    Plotly.plot('chart',graphs,{});        
+</script>
+{% else %}
+<script type="text/javascript">
+  var graphs = {{graphJSON2 | safe}};
+  Plotly.plot('chart',graphs,{});        
+</script>
+{% endif %}
     <script>
       $(window).on('load', function () {
           $('#loading').hide();

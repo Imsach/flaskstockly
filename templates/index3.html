@@ -5,12 +5,12 @@
     <div class="container">
         <div>
           {% if symbol %}
-          <h3 style="text-align:center;">{{ symbol }}</h3>
+          <h5 style="text-align:center;">{{ symbol }}</h5>
           {% else %}
           <h5 style="text-align:center;">(o).(o)</h5>
           {% endif %}
           <center>
-          <h1>Stock Dashboard</h1>
+          <h2>Stock Dashboard</h2>
           <form action="/stock_data" method="get">
             <label for="symbol">Enter Stock Symbol:</label>
             <input type="text" id="symbol" name="symbol" onkeyup="this.value=this.value.toUpperCase();">
@@ -29,18 +29,18 @@
     {% endif %}
     <!-- <h2 style="text-align:center;">RSI Chart</h2> -->
       {% if chart_exists2 %}
-          <iframe src="{{ url_for('static', filename='rsi.html') }}" style="width: 100%; height: 350px; border: none; padding: 0;"></iframe>
+          <iframe src="{{ url_for('static', filename='rsi.html') }}" style="width: 100%; height: 220px; border: none; padding: 0;"></iframe>
       {% else %}
           <h5 style="text-align:center;">RSI Chart will show here after you enter symbol.</h5>
       {% endif %}
     <!-- <h2 style="text-align:center;">ATR Chart</h2> -->
         {% if chart_exists3 %}
-            <iframe src="{{ url_for('static', filename='Atr.html') }}" style="width: 100%; height: 350px; border: none; padding: 0;"></iframe>
+            <iframe src="{{ url_for('static', filename='Atr.html') }}" style="width: 100%; height: 220px; border: none; padding: 0;"></iframe>
         {% else %}
             <h5 style="text-align:center;">ATR Chart will show here after you enter symbol.</h5>
         {% endif %}
     </div>
-    <center><h1>Stock News</h1></center>
+    <center><h3>Stock News</h3></center>
     <div class="tabley">
     <table>
       <thead>
@@ -92,7 +92,7 @@
         </tbody>
       </table></div>
       <br>
-      <center><h1>Stock Mutualfund Holders</h1></center>
+      <center><h3>Stock Mutualfund Holders</h3></center>
       <div class="tabley">
         <table>
         <thead>
@@ -117,7 +117,7 @@
         </tbody>
       </table></div>
       <br>
-      <center><h1>Stock Major Holders</h1></center>
+      <center><h3>Stock Major Holders</h3></center>
       <div class="tabley">
         <table>
         <thead>
@@ -136,7 +136,7 @@
         </tbody>
       </table></div>
       <br>
-      <center><h1>Stock Splits History</h1></center>
+      <center><h3>Stock Splits History</h3></center>
       <div class="tabley">
         <table>
         <thead>
@@ -155,7 +155,7 @@
         </tbody>
       </table></div>
 
-      <center><h1>SPY500 stocks History</h1></center>
+      <center><h3>SPY/RUS Stocks History</h3></center>
       <div class="tabley">
         <table>
         <thead>

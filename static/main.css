@@ -116,7 +116,7 @@ th {
 td:nth-child(1) {
   background-color: #dfdfdf;
   font-weight: bold;
-  font-size: 0.9em;
+  font-size: 0.7em;
 }
 
 td:hover {
@@ -125,13 +125,13 @@ td:hover {
 
 th {
   background-color: #1d2425;
-  font-size: 0.9em;
+  font-size: 0.7em;
 }
 
 td {
   color: #1d2425;
   background-color: #f7f8fa;
-  font-size: 0.9em;
+  font-size: 0.7em;
 }
 
 select {
@@ -144,6 +144,10 @@ select {
 
 #DataTables_Table_0_paginate {
   color: #294e85;
+}
+
+table.dataTable tbody td {
+  padding: 3px 5px;
 }
 
 /* Form elements */

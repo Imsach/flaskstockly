@@ -24,7 +24,9 @@ import secapi # To import API key from secapi
 import socket # Used to get the IP address of the user's machine.
 from bs4 import BeautifulSoup # Used for web scraping.
 from selenium import webdriver # Used to control a browser programmatically.
-from selenium.webdriver.chrome.options import Options # Used to set options for the Chrome browser when using Selenium.  
+from selenium.webdriver.chrome.options import Options as Op1 # Used to set options for the Chrome browser when using Selenium.
+from selenium.webdriver import Firefox
+from selenium.webdriver.firefox.options import Options as Op2
 import plotly  # Used for data visualization.
 import plotly.express as px # Used for data visualization with Plotly library.
 import os 
@@ -67,7 +69,7 @@ if not os.path.exists("stock_data.db"):
     conn.execute("CREATE TABLE mutualfund_data (Holder TEXT, Shares REAL, Date Reported TIMESTAMP, '% Out' REAL, Value REAL)")
     conn.execute("CREATE TABLE majorholders_data (numbers TEXT, title TEXT, symbol TEXT)")
     conn.execute("CREATE TABLE stocksplits_data (Date TEXT, 'Stock Splits' REAL, symbol TEXT)")
-    conn.execute("CREATE TABLE run_data (Symbol TEXT, Price REAL, Open REAL, High REAL, Low REAL, Volume INTEGER, 'Latest trading day' TEXT, 'Previous close' REAL, Change REAL, 'Change percent' REAL, 'Entered' TEXT)")
+    conn.execute("CREATE TABLE run_data (Symbol TEXT, Price REAL, Open REAL, High REAL, Low REAL, Volume INTEGER, 'Latest trading day' TEXT, 'Previous close' REAL, Change REAL, 'Change percent' REAL, 'Entered' TEXT, 'Company' TEXT, 'Sector' TEXT)")
     conn.commit()
     
 else:
@@ -203,17 +205,28 @@ def hello_worldn():
     cursorRun = conn.execute(queryRun)
     RunData = cursorRun.fetchall()
     conn.commit()
+
+    df2 = pd.DataFrame(data=RunData, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day',
+                                               'Previous close', 'Change', 'Change percent', 'Entered', 'Company', 'Sector'])
     
     # fig = px.scatter(df, x="Price", y='Change', size="Change percent", color="Symbol", hover_name="Symbol", size_max=60)
     
-    fig = px.scatter(df, x="Price", y="Change percent", color="Symbol", log_x=True, log_y=True, size_max=60)
+    fig = px.scatter(df, x="Price", y="Change percent", color="Sector", log_x=True, log_y=True, size_max=100)
     fig.update_layout(height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#3880cb")
     fig.update_xaxes(title_font_color="#3770ab", gridcolor='#202436')
     fig.update_yaxes(title_font_color="#3770ab", gridcolor='#202436')
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), graphJSON=graphJSON, zip=zip, stockinfo=stockinfo, df=df, ip=ip, isApiDemo=isApiDemo, RunData=RunData, enableRefresh=enableRefresh)
+    fig2 = px.scatter(df2, x="Price", y="Change percent", color="Sector", log_x=True, log_y=True, size_max=100)
+    fig2.update_layout(height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#3880cb")
+    fig2.update_xaxes(title_font_color="#3770ab", gridcolor='#202436')
+    fig2.update_yaxes(title_font_color="#3770ab", gridcolor='#202436')
+
+    graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), column_names2=df2.columns.values, row_data2=list(df2.values.tolist()),
+                            graphJSON=graphJSON, graphJSON2=graphJSON2, zip=zip, stockinfo=stockinfo, df=df, ip=ip, isApiDemo=isApiDemo, RunData=RunData, enableRefresh=enableRefresh)
 
 '''
 This code is a route for the app that will run when the user visits the '/run' page. 
@@ -344,11 +357,16 @@ which is converted into a JSON object and rendered in the template 'trend.html'.
 @app.route('/run2', methods=("POST", "GET"))
 def hhh():
     global enableRefresh2
-    options = Options()
-    options.headless = True
-    options.add_argument("--window-size=1920,1200")
-    driver = webdriver.Chrome(options=options, executable_path='.\static\chromedriver.exe')
-
+    try:
+        options = Op1()
+        options.headless = True
+        options.add_argument("--window-size=1920,1200")
+        driver = webdriver.Chrome(options=options, executable_path='.\static\chromedriver.exe')
+    except:
+        options = Op2()
+        options.headless = True
+        options.add_argument("--window-size=1920,1200")
+        driver = Firefox(options=options, executable_path='.\static\geckodriver.exe')
     website = 'https://stockbeep.com/trending-stocks-ssrvol-desc'
     table_name = 'DataTables_Table_0'
 
@@ -453,15 +471,15 @@ def stock_data():
         fig1 = go.Bar(x=data['Date'], y=data['Volume'], marker_color="DarkGrey", opacity=0.2, name='Volume')
         fig2 = go.Scatter(x=data['Date'], y=data['Close'], mode='lines+markers', marker=dict(symbol='circle', size=2, color='yellow'), name='Price', yaxis='y2', line=dict(color='red'))
         figx = go.Candlestick(x=data['Date'], open=data['Open'], high=data['High'], low=data['Low'], close=data['Close'], line=dict(width=10), opacity=0.4, name='Price', yaxis='y')
-        fig3 = go.Scatter(x=data['Date'], y=data['Avg_volume'], mode='lines', opacity=0.4, name='AvgVolume', line=dict(color='yellow', dash='dash'))
+        fig3 = go.Scatter(x=data['Date'], y=data['Avg_volume'], mode='lines', opacity=0.4, name='AvgVolume', line=dict(color='violet', dash='dash'))
         fig4 = go.Scatter(x=data['Date'], y=data['Sma44'], mode='lines', opacity=0.4, name='SMA 44', yaxis='y2', line=dict(color='grey', dash='dash'))
         fig5 = go.Scatter(x=data['Date'], y=data['Sma200'], mode='lines', opacity=0.5, name='SMA 200', yaxis='y2', line=dict(color='cyan', dash='dash'))
-        fig6 = go.Scatter(x=data['Date'], y=data['Rsi'], mode='lines', name='RSI', line=dict(color='yellow'))
+        fig6 = go.Scatter(x=data['Date'], y=data['Rsi'], mode='lines', name='RSI', line=dict(color='silver'))
         fig7 = go.Scatter(x=data['Date'], y=[20]*len(data['Date']), mode='lines', name='RSI20', line=dict(color='green', dash='dash'))
         fig8 = go.Scatter(x=data['Date'], y=[80]*len(data['Date']), mode='lines', name='RSI80', line=dict(color='red', dash='dash'))
         
 
-        layout = go.Layout(title='Stock Volume and Price - ' + symbol, template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='Volume (in millions)'), yaxis2=dict(title='Price', overlaying='y', side='right', position=0.95), margin=go.layout.Margin(l=0, r=0, b=0, t=26))
+        layout = go.Layout(title='Stock Volume and Price - ' + symbol, titlefont=dict(color='green', size=12), template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='Volume (in millions)'), yaxis2=dict(title='Price', overlaying='y', side='right', position=0.95), margin=go.layout.Margin(l=0, r=0, b=0, t=26))
         layout2 = go.Layout(template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='RSI'), yaxis2=dict(title='Price', overlaying='y', side='right'), margin=go.layout.Margin(l=0, r=0, b=0, t=0))
         
         fig = go.Figure(data=[fig1, fig2, figx, fig3, fig4, fig5], layout=layout)
@@ -471,7 +489,7 @@ def stock_data():
         try:
             atr = ta.volatility.AverageTrueRange(data["High"], data["Low"], data["Close"], window = 14, fillna=False)
             data["Atr"] = pd.Series(atr.average_true_range(), index=data.index[14:])
-            fig9 = go.Scatter(x=data['Date'], y=data['Atr'], mode='lines', name='Atr', line=dict(color='blue'))
+            fig9 = go.Scatter(x=data['Date'], y=data['Atr'], mode='lines', name='Atr', line=dict(color='silver'))
             layout3 = go.Layout(template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='Average True Range'), yaxis2=dict(title='Price', overlaying='y', side='right'),  margin=go.layout.Margin(l=0, r=0, b=0, t=0))
             fig_3 = go.Figure(data=[fig9, fig2], layout=layout3)
             fig_3.write_html(image_HTML3)
