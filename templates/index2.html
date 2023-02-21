@@ -1,7 +1,7 @@
 {% extends "base2.html" %}
 {% block content %}
 <title>FlaskStockly</title>
-<meta http-equiv="refresh" content="{% if enableRefresh %}5{% else %}20{% endif %}; URL=/view">
+<meta http-equiv="refresh" content="{% if enableRefresh %}25{% else %}600{% endif %}; URL=/view">
 <div id="loading2"><h1 style="text-align:center; margin-top: 100px">Loading...</h1></div>
 <div id="loading3"><h2 style="text-align:center">Hang on tight! click on view dashboard if it's loading forever...</h2></div>
 <div>
@@ -29,7 +29,8 @@
 <form method="post" action="/refresh">
   <input type="checkbox" name="enableRefresh" {% if enableRefresh %}checked{% endif %}> Auto-refresh 
   <input type="submit" value="Save">
-</form>  
+</form>
+  <div class="tabley">  
   <table>
     <thead>
 
@@ -74,7 +75,7 @@
 
     </tbody>
 
-  </table>  
+  </table></div>
 
   <h5><p style="text-align:center">Organize and streamline your stock information with our user-friendly web application. With data gathered from the API and SPY500 list
     <br>[ As well as the option to manually add stocks through the '/anystock' page (e.g. http://{{ip}}/{% print(df.iloc(0)[0, 0]) %}) ]

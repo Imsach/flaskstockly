@@ -57,6 +57,13 @@ form {
   h2 {
     font-size: 18px;
   }
+  table {
+    width: 150%;
+  }
+  .tabley {
+    width: 100%;
+    overflow-x: auto;
+  }
 }
 
 /* Loading overlay */
