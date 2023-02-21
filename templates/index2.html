@@ -1,27 +1,35 @@
 {% extends "base2.html" %}
 {% block content %}
 <title>FlaskStockly</title>
+<meta http-equiv="refresh" content="{% if enableRefresh %}5{% else %}20{% endif %}; URL=/view">
 <div id="loading2"><h1 style="text-align:center; margin-top: 100px">Loading...</h1></div>
 <div id="loading3"><h2 style="text-align:center">Hang on tight! click on view dashboard if it's loading forever...</h2></div>
 <div>
   {% if isApiDemo %}
-    <center><h3>__Api key is set to 'demo'; App may not work as expected__</h3></center><br>
+    <center><h3>__Api key is set to 'demo'; App may not work as expected__</h3></center>
   {% else %}
-    <center><h5>__(o).(o)__</h5></center><br>
+    <center><h5>__(o).(o)__</h5></center>
   {% endif %}
 </div>
 <h4><p style="text-align:center">
   <button id="trending-stocks" type="button">Trending Stocks</button>
-  <button id="run-spy-500" type="button">Run SPY 500</button>
-  <button id="view-dashboard" type="button">View Dashboard</button>
+  <button id="view-dashboard" type="button">Refresh</button>
   <input id="txt" name="addstock" type="text" maxlength="5" size="7" >
   <button id="add-stock" type="button">=Add Stock=</button>
   <button id="view-stock" type="button" title="View Stock News, Institution Holders, Charts, etc.">=$tock dashboard=</button>
-</p>
-
-<meta http-equiv="refresh" content="35; URL=/view">
+  <center>
+    <form method="post" action="/run" style="display:inline-block;">
+    <label style="display:inline-block;"><input type="checkbox" name="lists" value="SPY500"> SPY500</label>
+    <label style="display:inline-block;"><input type="checkbox" name="lists" value="SPY600"> SPY Small 600</label>
+    <label style="display:inline-block;"><input type="checkbox" name="lists" value="Rus1000"> Rus1000</label>
+    <input type="submit" title="Check one or all three boxes :) grab coffee!" value="Run">
+    </form> 
+  </center></p>
 <div id="chart" class="chart"></div>
-
+<form method="post" action="/refresh">
+  <input type="checkbox" name="enableRefresh" {% if enableRefresh %}checked{% endif %}> Auto-refresh 
+  <input type="submit" value="Save">
+</form>  
   <table>
     <thead>
 
@@ -69,7 +77,7 @@
   </table>  
 
   <h5><p style="text-align:center">Organize and streamline your stock information with our user-friendly web application. With data gathered from the API and SPY500 list
-    <br>[ As well as the option to manually add stocks through the '/anystock' page (e.g. http://{{ip}}/{% print(df.iloc(0)[0, 0]) %}, ]
+    <br>[ As well as the option to manually add stocks through the '/anystock' page (e.g. http://{{ip}}/{% print(df.iloc(0)[0, 0]) %}) ]
     <br> you have the flexibility to track the stocks that matter most to you. Conveniently run locally at {{ ip }}
     <br> Stay on top of the latest market trends with ease. :) </p></h5>
 
@@ -87,7 +95,6 @@
 });});</script> 
   <script>
     const trendingStocksButton = document.getElementById("trending-stocks");
-    const runSpy500Button = document.getElementById("run-spy-500");
     const viewDashboardButton = document.getElementById("view-dashboard");
     const addStockButton = document.getElementById("add-stock");
     const viewStockButton = document.getElementById("view-stock");
@@ -96,11 +103,6 @@
     trendingStocksButton.addEventListener("click", function() {
       window.location.href = "/run2";
       $('#loading2').show();
-    });
-  
-    runSpy500Button.addEventListener("click", function() {
-      window.location.href = "/run";
-      $('#loading3').show();
     });
   
     viewDashboardButton.addEventListener("click", function() {

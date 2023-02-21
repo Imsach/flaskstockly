@@ -50,6 +50,7 @@ ip = ip.getsockname()[0] # Get the IP address of the user's machine and assign i
 stockinfo = []
 isBrQexecuted = False
 isApiDemo = False
+enableRefresh = True
 default_start_date = '2022-02-01'
 
 if secapi.api_key == 'demo':
@@ -100,6 +101,12 @@ else:
 def welcomePage():
     return redirect('/view')
 
+@app.route('/refresh', methods=("POST", "GET"))
+def refresh():
+    global enableRefresh
+    enableRefresh = not enableRefresh
+    return redirect('/view')
+
 '''
 This code is part of a web application that allows users to enter a stock symbol
 and get information about the stock. It uses the Alpha Vantage API to get the stock data.
@@ -110,6 +117,7 @@ The code then creates a timestamp and loops through the data to store it into an
 Finally, it creates a Pandas DataFrame from "stockinfo" and drops any duplicate entries based on the stock symbol. If there is an error with the stock symbol, it returns an error message. Otherwise, it renders an HTML template with all of the data stored in "df".
 '''
 
+
 @app.route('/<stock>', methods=("POST", "GET"))
 def getStock(stock):
     api_key = secapi.api_key
@@ -118,10 +126,40 @@ def getStock(stock):
     data = r.json()
     t1 = time.strftime("%m/%d/%Y, %H:%M:%S", time.localtime())
 
+    df500 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
+    df600 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_600_companies")
+    df1000 = pd.read_html("https://en.wikipedia.org/wiki/Russell_1000_Index")
+    sp500 = df500[0]['Symbol'].values.tolist()
+    security500Name = df500[0]['Security'].values.tolist()
+    sp500Sector = df500[0]['GICS Sector'].values.tolist()
+    sp600 = df600[0]['Symbol'].values.tolist()
+    security600Name = df600[0]['Company'].values.tolist()
+    sp600Sector = df600[0]['GICS Sector'].values.tolist()
+    rus1000 = df1000[2]['Ticker'].values.tolist()
+    rus1000Name = df1000[2]['Company'].values.tolist()
+    rus1000Sector = df1000[2]['GICS Sector'].values.tolist()
+
+    if stock in sp500:
+        stock = sp500.index(stock)
+        companyName = security500Name[stock]
+        sector = sp500Sector[stock]
+    elif stock in sp600:
+        stock = sp600.index(stock)
+        companyName = security600Name[stock]
+        sector = sp600Sector[stock]
+    elif stock in rus1000:
+        stock = rus1000.index(stock)
+        companyName = rus1000Name[stock]
+        sector = rus1000Sector[stock]
+    else:
+        companyName = "NA"
+        sector = "NA"
+
+
     try:
         for info in data:
-            stockinfo.append([data['Global Quote']['01. symbol'], data['Global Quote']['05. price'], data['Global Quote']['02. open'], data['Global Quote']['03. high'], data['Global Quote']['04. low'], data['Global Quote']['06. volume'], data['Global Quote']['07. latest trading day'], data['Global Quote']['08. previous close'], data['Global Quote']['09. change'], data['Global Quote']['10. change percent'], t1])
-        df = pd.DataFrame(data=stockinfo, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day', 'Previous close', 'Change', 'Change percent', 'Entered'])
+            stockinfo.append([data['Global Quote']['01. symbol'], data['Global Quote']['05. price'], data['Global Quote']['02. open'], data['Global Quote']['03. high'], data['Global Quote']['04. low'], data['Global Quote']['06. volume'], data['Global Quote']['07. latest trading day'], data['Global Quote']['08. previous close'], data['Global Quote']['09. change'], data['Global Quote']['10. change percent'], t1, companyName, sector])
+        df = pd.DataFrame(data=stockinfo, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day', 'Previous close', 'Change', 'Change percent', 'Entered', 'Company', 'Sector'])
 
 
         df = (df.drop_duplicates(subset='Symbol', keep='last'))
@@ -149,8 +187,9 @@ stockinfo variable, DataFrame object df and ip address.
 
 @app.route('/view', methods=("POST", "GET"))
 def hello_worldn():
+    global enableRefresh
     df = pd.DataFrame(data=stockinfo, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day',
-                                               'Previous close', 'Change', 'Change percent', 'Entered'])
+                                               'Previous close', 'Change', 'Change percent', 'Entered', 'Company', 'Sector'])
     df = (df.drop_duplicates(subset='Symbol', keep='last'))
 
     queryRun = "SELECT * FROM run_data"
@@ -167,7 +206,7 @@ def hello_worldn():
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), graphJSON=graphJSON, zip=zip, stockinfo=stockinfo, df=df, ip=ip, isApiDemo=isApiDemo, RunData=RunData)
+    return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), graphJSON=graphJSON, zip=zip, stockinfo=stockinfo, df=df, ip=ip, isApiDemo=isApiDemo, RunData=RunData, enableRefresh=enableRefresh)
 
 '''
 This code is a route for the app that will run when the user visits the '/run' page. 
@@ -182,23 +221,44 @@ Finally, it redirects the user to the '/view' page.
 
 def runQuery():
     global isBrQexecuted
-    if not isBrQexecuted:
+    if not isBrQexecuted and request.method == 'POST':
+        stockLists = list()
+        stockLists = request.form.getlist('lists')
         isBrQexecuted = True
-        thread = threading.Thread(target=backgroundRunQuery)
+        thread = threading.Thread(target=backgroundRunQuery, args=(stockLists,))
         thread.start()
         return redirect('/view')
     else:
         return redirect('/view')
 
-def backgroundRunQuery(stockinfo=stockinfo):
-   
-    pd2 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
-    df = pd2[0]
-    stocks = df['Symbol'].values.tolist()
-    shuffle(stocks)
+def backgroundRunQuery(stockLists, stockinfo=stockinfo):
+    df500 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
+    df600 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_600_companies")
+    df1000 = pd.read_html("https://en.wikipedia.org/wiki/Russell_1000_Index")
+    sp500 = df500[0]['Symbol'].values.tolist()
+    security500Name = df500[0]['Security'].values.tolist()
+    sp500Sector = df500[0]['GICS Sector'].values.tolist()
+    sp600 = df600[0]['Symbol'].values.tolist()
+    security600Name = df600[0]['Company'].values.tolist()
+    sp600Sector = df600[0]['GICS Sector'].values.tolist()
+    rus1000 = df1000[2]['Ticker'].values.tolist()
+    rus1000Name = df1000[2]['Company'].values.tolist()
+    rus1000Sector = df1000[2]['GICS Sector'].values.tolist()
+
+    allStocks = []
+    for lst in stockLists:
+        if lst == "SPY500":
+           allStocks.extend(sp500)
+        elif lst == "SPY600":
+           allStocks.extend(sp600)
+        elif lst == "Rus1000":
+           allStocks.extend(rus1000)
+        else:
+           allStocks.extend(lst)
+    shuffle(allStocks)
     count = 0
     while count < 2:
-        for stock in stocks:
+        for stock in allStocks:
             try:
                 if stock not in stockinfo:
                     print(f"adding {stock}")
@@ -209,14 +269,39 @@ def backgroundRunQuery(stockinfo=stockinfo):
 
                     df = pd.DataFrame(data=stockinfo,
                                     columns=['Symbol', 'Price', 'Open', 'High', 'Low', 'Volume', 'Latest trading day',
-                                            'Previous close', 'Change', 'Change percent', 'Entered'])
+                                            'Previous close', 'Change', 'Change percent', 'Entered', 'Company', 'Sector'])
                     
                     df = (df.drop_duplicates(subset='Symbol', keep='last'))
                     df.to_sql('run_data', conn, if_exists='replace', index=False)
                 
                     if r.status_code == 200:
                         t1 = time.strftime("%m/%d/%Y, %H:%M:%S", time.localtime())
-                        stockinfo.append([datas['Global Quote']['01. symbol'],  datas['Global Quote']['05. price'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent'], t1])
+                        symbol = datas['Global Quote']['01. symbol']
+                        price = datas['Global Quote']['05. price']
+                        open_price = datas['Global Quote']['02. open']
+                        high = datas['Global Quote']['03. high']
+                        low = datas['Global Quote']['04. low']
+                        volume = datas['Global Quote']['06. volume']
+                        latest_trading_day = datas['Global Quote']['07. latest trading day']
+                        previous_close = datas['Global Quote']['08. previous close']
+                        change = datas['Global Quote']['09. change']
+                        change_percent = datas['Global Quote']['10. change percent']
+                        if symbol in sp500:
+                            ids = sp500.index(symbol)
+                            companyName = security500Name[ids]
+                            sector = sp500Sector[ids]
+                        elif symbol in sp600:
+                            ids = sp600.index(symbol)
+                            companyName = security600Name[ids]
+                            sector = sp600Sector[ids]
+                        elif symbol in rus1000:
+                            ids = rus1000.index(symbol)
+                            companyName = rus1000Name[ids]
+                            sector = rus1000Sector[ids]
+                        else:
+                            companyName = "NA"
+                            sector = "NA"
+                        stockinfo.append([symbol, price, open_price, high, low, volume, latest_trading_day, previous_close, change, change_percent, t1, companyName, sector])
                         sleepTime = 12.5
                         while sleepTime > 0:
                             print(f"Remaining sleep time: {sleepTime} seconds")
@@ -229,7 +314,7 @@ def backgroundRunQuery(stockinfo=stockinfo):
                             time.sleep(0.5)
                             sleepTime -= 0.5
                         t1 = time.strftime("%m/%d/%Y, %H:%M:%S", time.localtime())
-                        stockinfo.append([datas['Global Quote']['01. symbol'],  datas['Global Quote']['05. price'], datas['Global Quote']['02. open'], datas['Global Quote']['03. high'], datas['Global Quote']['04. low'], datas['Global Quote']['06. volume'], datas['Global Quote']['07. latest trading day'], datas['Global Quote']['08. previous close'], datas['Global Quote']['09. change'], datas['Global Quote']['10. change percent'], t1])
+                        stockinfo.append([symbol, price, open_price, high, low, volume, latest_trading_day, previous_close, change, change_percent, t1, companyName, sector])
                             
                 else:
                     return redirect('/view')
