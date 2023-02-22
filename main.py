@@ -207,7 +207,10 @@ def hello_worldn():
     df = pd.DataFrame(data=stockinfo, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day',
                                                'Previous close', 'Change', 'Change percent', 'Entered', 'Company', 'Sector'])
     df = (df.drop_duplicates(subset='Symbol', keep='last'))
-    df['Change percent'] = df['Change percent'].str.replace('%', '').astype(float)
+    if df['Change percent'].dtype == 'object':
+        df['Change percent'] = df['Change percent'].str.replace('%', '').astype(float)
+    else:
+        df['Change percent'] = df['Change percent'].replace('%', '').astype(float)
     queryRun = "SELECT * FROM run_data"
     cursorRun = conn.execute(queryRun)
     RunData = cursorRun.fetchall()
@@ -215,12 +218,18 @@ def hello_worldn():
 
     df2 = pd.DataFrame(data=RunData, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day',
                                                'Previous close', 'Change', 'Change percent', 'Entered', 'Company', 'Sector'])
-    df2['Change percent'] = df2['Change percent'].replace('%', '').astype(float)
+    if df2['Change percent'].dtype == 'object':
+        df2['Change percent'] = df2['Change percent'].str.replace('%', '').astype(float)
+    else:
+        df2['Change percent'] = df2['Change percent'].replace('%', '').astype(float)
     # fig = px.scatter(df, x="Price", y='Change', size="Change percent", color="Symbol", hover_name="Symbol", size_max=60)
     positiveCount = len(df2[df2['Change percent'] > 0])
     negativeCount = len(df2[df2['Change percent'] < 0])
     
-    fig = px.scatter(df, x="Price", y="Change percent", color="Sector", hover_name='Symbol', log_x=True, size_max=200)
+    if isChartStlBar:
+        fig = px.bar(df, x="Symbol", y="Change percent", color="Sector", hover_name='Symbol', range_y=[df['Change percent'].min(), df['Change percent'].max()])
+    else:
+        fig = px.scatter(df, x="Price", y="Change percent", color="Sector", hover_name='Symbol', log_x=True, size_max=1500)
     fig.update_layout(height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#3880cb")
     fig.update_xaxes(title_font_color="#3770ab", gridcolor='#202436')
     fig.update_yaxes(title_font_color="#3770ab", gridcolor='#202436')
