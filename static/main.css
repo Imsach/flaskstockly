@@ -38,6 +38,12 @@ form {
   gap: 10px;
 }
 
+form[name="autor"] {
+  justify-content: right;
+}
+
+
+
 /* Media query for smaller screens */
 
 @media (max-width: 700px) {
@@ -156,12 +162,12 @@ button {
   background-color: #5c8cd3;
   border: none;
   color: black;
-  padding: 1px 1px;
+  padding: 1px 5px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 18px;
-  border-radius: 2px;
+  font-size: 14px;
+  border-radius: 5px;
   transition-duration: 0.4s;
 }
 

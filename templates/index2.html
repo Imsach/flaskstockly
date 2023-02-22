@@ -25,10 +25,15 @@
     <input type="submit" title="Check one or all three boxes :) grab coffee! It'll take a while" value="Run">
     </form> 
   </center></p></h4>
+  <form method="post" name="autor" action="/changechart">
+    <input type="submit" value="Bar/Scatter" title="Choose your chart style">
+  </form>
 <div id="chart" class="chart"></div>
-<form method="post" action="/refresh">
-  <input type="checkbox" name="enableRefresh" {% if enableRefresh %}checked{% endif %}> Auto-refresh 
-  <input type="submit" value="Save">
+{% if positiveCount and negativeCount %}<center><h6>Stock market indexes Strong stocks: <span style="color: green;">{{ positiveCount }}</span> Weak stocks: <span style="color: red;">{{ negativeCount }}</span></h6></center>
+{% else %} {% endif %}
+<form method="post" name="autor" action="/refresh">
+  <input type="checkbox" name="enableRefresh" {% if enableRefresh %}checked{% endif %}>  
+  <input type="submit" value="Auto-refresh" title="Click to turn on/off auto-refresh">
 </form>
   <div>
     {% if stockinfo %}
@@ -133,7 +138,6 @@
     <p style="text-align:center">[ The RUN script efficiently retrieves all stock data from the API, utilizing Python code. ]<br>
       With its optimized 13-second interval, it seamlessly adds a random stock from the SPY500 list.
       <br>[ (Note: the API allows for 5 free requests per minute) ]</p></h5>
-      
 
   {% block scripts %} 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

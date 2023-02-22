@@ -11,7 +11,7 @@
           {% endif %}
           <center>
           <h2>Stock Dashboard</h2>
-          <form action="/stock_data" method="get">
+          <form action="/stock_data" name="chartform" method="get">
             <label for="symbol">Enter Stock Symbol:</label>
             <input type="text" id="symbol" name="symbol" onkeyup="this.value=this.value.toUpperCase();">
             <label for="start_date">Chart starts from:</label>
@@ -25,19 +25,19 @@
     {% if chart_exists %}
         <iframe src="{{ url_for('static', filename='volume_price.html') }}" style="width: 100%; height: 500px; border: 10px; padding: 0;"></iframe>
     {% else %}
-        <h5 style="text-align:center;">Chart will show here after you enter symbol.</h5>
+        <h6 style="text-align:center;">Chart will show here after you enter symbol.</h6>
     {% endif %}
     <!-- <h2 style="text-align:center;">RSI Chart</h2> -->
       {% if chart_exists2 %}
           <iframe src="{{ url_for('static', filename='rsi.html') }}" style="width: 100%; height: 220px; border: none; padding: 0;"></iframe>
       {% else %}
-          <h5 style="text-align:center;">RSI Chart will show here after you enter symbol.</h5>
+          <h6 style="text-align:center;">RSI Chart will show here after you enter symbol.</h6>
       {% endif %}
     <!-- <h2 style="text-align:center;">ATR Chart</h2> -->
         {% if chart_exists3 %}
             <iframe src="{{ url_for('static', filename='Atr.html') }}" style="width: 100%; height: 220px; border: none; padding: 0;"></iframe>
         {% else %}
-            <h5 style="text-align:center;">ATR Chart will show here after you enter symbol.</h5>
+            <h6 style="text-align:center;">ATR Chart will show here after you enter symbol.</h6>
         {% endif %}
     </div>
     <center><h3>Stock News</h3></center>
@@ -82,10 +82,10 @@
           {% for row in data %}
           <tr>
             <td>{{ row[0] }}</td>
-            <td>{{ row[1] }}</td>
-            <td>{{ row[2] }}</td>
-            <td>{{ row[3] }}</td>
-            <td>{{ row[4] }}</td>
+            <td>{{ row[1]|round(2) }}</td>
+            <td>{{ row[2]|round(2) }}</td>
+            <td>{{ row[3]|round(2) }}</td>
+            <td>{{ row[4]|round(2) }}</td>
             <td>{{ row[5] }}</td>
           </tr>
           {% endfor %}
@@ -177,13 +177,13 @@
           {% for row in RunData %}
           <tr>
             <td><a href="/stock_data?symbol={{ row[0] }}" target="_blank">{{ row[0]}}</a></td>
-            <td>{{ row[1] }}</td>
-            <td>{{ row[2] }}</td>
-            <td>{{ row[3] }}</td>
-            <td>{{ row[4] }}</td>
+            <td>{{ row[1]|float|round(2) }}</td>
+            <td>{{ row[2]|float|round(2) }}</td>
+            <td>{{ row[3]|float|round(2) }}</td>
+            <td>{{ row[4]|float|round(2) }}</td>
             <td>{{ row[5] }}</td>
             <td>{{ row[6] }}</td>
-            <td>{{ row[7] }}</td>
+            <td>{{ row[7]|float|round(2) }}</td>
             <td>{{ row[8] }}</td>
             <td>{{ row[9] }}</td>
             <td>{{ row[10] }}</td>

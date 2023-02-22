@@ -52,8 +52,9 @@ ip = ip.getsockname()[0] # Get the IP address of the user's machine and assign i
 stockinfo = []
 isBrQexecuted = False
 isApiDemo = False
-enableRefresh = True
-enableRefresh2 = True
+enableRefresh = False
+enableRefresh2 = False
+isChartStlBar = False
 default_start_date = '2022-02-01'
 
 if secapi.api_key == 'demo':
@@ -115,6 +116,12 @@ def refresh2():
     global enableRefresh2
     enableRefresh2 = not enableRefresh2
     return redirect('/run2')
+
+@app.route('/changechart', methods=("POST", "GET"))
+def changechart():
+    global isChartStlBar
+    isChartStlBar = not isChartStlBar
+    return redirect('/view')
 
 '''
 This code is part of a web application that allows users to enter a stock symbol
@@ -196,11 +203,11 @@ stockinfo variable, DataFrame object df and ip address.
 
 @app.route('/view', methods=("POST", "GET"))
 def hello_worldn():
-    global enableRefresh
+    global enableRefresh, isChartStlBar
     df = pd.DataFrame(data=stockinfo, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day',
                                                'Previous close', 'Change', 'Change percent', 'Entered', 'Company', 'Sector'])
     df = (df.drop_duplicates(subset='Symbol', keep='last'))
-
+    df['Change percent'] = df['Change percent'].str.replace('%', '').astype(float)
     queryRun = "SELECT * FROM run_data"
     cursorRun = conn.execute(queryRun)
     RunData = cursorRun.fetchall()
@@ -208,17 +215,21 @@ def hello_worldn():
 
     df2 = pd.DataFrame(data=RunData, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day',
                                                'Previous close', 'Change', 'Change percent', 'Entered', 'Company', 'Sector'])
-    
+    df2['Change percent'] = df2['Change percent'].str.replace('%', '').astype(float)
     # fig = px.scatter(df, x="Price", y='Change', size="Change percent", color="Symbol", hover_name="Symbol", size_max=60)
+    positiveCount = len(df2[df2['Change percent'] > 0])
+    negativeCount = len(df2[df2['Change percent'] < 0])
     
-    fig = px.scatter(df, x="Price", y="Change percent", color="Sector", log_x=True, log_y=True, size_max=100)
+    fig = px.scatter(df, x="Price", y="Change percent", color="Sector", hover_name='Symbol', log_x=True, size_max=200)
     fig.update_layout(height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#3880cb")
     fig.update_xaxes(title_font_color="#3770ab", gridcolor='#202436')
     fig.update_yaxes(title_font_color="#3770ab", gridcolor='#202436')
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    fig2 = px.scatter(df2, x="Price", y="Change percent", color="Sector", log_x=True, log_y=True, size_max=100)
+    if isChartStlBar:
+        fig2 = px.bar(df2, x="Symbol", y="Change percent", color="Sector", hover_name='Symbol', range_y=[df2['Change percent'].min(), df2['Change percent'].max()])
+    else:
+        fig2 = px.scatter(df2, x="Price", y="Change percent", color="Sector", hover_name='Symbol', log_x=True, size_max=1500)
     fig2.update_layout(height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#3880cb")
     fig2.update_xaxes(title_font_color="#3770ab", gridcolor='#202436')
     fig2.update_yaxes(title_font_color="#3770ab", gridcolor='#202436')
@@ -226,7 +237,9 @@ def hello_worldn():
     graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
 
     return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), column_names2=df2.columns.values, row_data2=list(df2.values.tolist()),
-                            graphJSON=graphJSON, graphJSON2=graphJSON2, zip=zip, stockinfo=stockinfo, df=df, ip=ip, isApiDemo=isApiDemo, RunData=RunData, enableRefresh=enableRefresh)
+                            graphJSON=graphJSON, graphJSON2=graphJSON2, zip=zip,
+                            stockinfo=stockinfo, df=df, ip=ip, isApiDemo=isApiDemo, RunData=RunData, enableRefresh=enableRefresh,
+                            positiveCount=positiveCount, negativeCount=negativeCount)
 
 '''
 This code is a route for the app that will run when the user visits the '/run' page. 
@@ -292,6 +305,7 @@ def backgroundRunQuery(stockLists, stockinfo=stockinfo):
                                             'Previous close', 'Change', 'Change percent', 'Entered', 'Company', 'Sector'])
                     
                     df = (df.drop_duplicates(subset='Symbol', keep='last'))
+                    df['Change percent'] = df['Change percent'].str.replace('%', '').astype(float)
                     df.to_sql('run_data', conn, if_exists='replace', index=False)
                 
                     if r.status_code == 200:
@@ -417,12 +431,12 @@ def hhh():
     df = pd.DataFrame(data=values,
                       columns=['time', 'ticker', 'name', 'last', 'high', 'chg', '% change', '5d', 'vol', 'Relative Vol', 'cap', 'Chart Facts'])
     df = (df.drop_duplicates(subset='ticker', keep='last'))
-    fig = px.scatter(df, x="% change", y="Relative Vol", color="ticker", log_x=True, log_y=True, size_max=60)
+    fig = px.scatter(df, x="% change", y="Relative Vol", color="ticker", log_x=True, log_y=True, size_max=100)
     fig.update_layout(height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#3880cb")
     fig.update_xaxes(title_font_color="#3770ab", gridcolor='#202436')
     fig.update_yaxes(title_font_color="#3770ab", gridcolor='#202436')
-    graph_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    return render_template('trend.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, graph_json=graph_json, values=values, df=df, ip=ip, enableRefresh2=enableRefresh2)
+    graphJson = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    return render_template('trend.html', column_names=df.columns.values, row_data=list(df.values.tolist()), zip=zip, graphJson=graphJson, values=values, df=df, ip=ip, enableRefresh2=enableRefresh2)
            
 image_HTML = 'static/volume_price.html'
 image_HTML2 = 'static/rsi.html'
@@ -477,12 +491,15 @@ def stock_data():
         fig6 = go.Scatter(x=data['Date'], y=data['Rsi'], mode='lines', name='RSI', line=dict(color='silver'))
         fig7 = go.Scatter(x=data['Date'], y=[20]*len(data['Date']), mode='lines', name='RSI20', line=dict(color='green', dash='dash'))
         fig8 = go.Scatter(x=data['Date'], y=[80]*len(data['Date']), mode='lines', name='RSI80', line=dict(color='red', dash='dash'))
+
+
         
 
-        layout = go.Layout(title='Stock Volume and Price - ' + symbol, titlefont=dict(color='green', size=12), template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='Volume (in millions)'), yaxis2=dict(title='Price', overlaying='y', side='right', position=0.95), margin=go.layout.Margin(l=0, r=0, b=0, t=26))
+        layout = go.Layout(title='Stock Volume and Price - ' + symbol, titlefont=dict(color='green', size=12), template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='Volume (in millions)'), yaxis2=dict(title='Price', overlaying='y', side='right', position=0.95, title_font_color="#3770ab", gridcolor='#202436'), margin=go.layout.Margin(l=0, r=0, b=0, t=26))
         layout2 = go.Layout(template='plotly_dark', xaxis=dict(title='Date'), yaxis=dict(title='RSI'), yaxis2=dict(title='Price', overlaying='y', side='right'), margin=go.layout.Margin(l=0, r=0, b=0, t=0))
         
-        fig = go.Figure(data=[fig1, fig2, figx, fig3, fig4, fig5], layout=layout)
+        fig = go.Figure(data=[fig1, figx, fig2, fig3, fig4, fig5], layout=layout)
+        
         fig.write_html(image_HTML)
         fig_2 = go.Figure(data=[fig2, fig6, fig7, fig8], layout=layout2)
         fig_2.write_html(image_HTML2)
