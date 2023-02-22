@@ -215,7 +215,7 @@ def hello_worldn():
 
     df2 = pd.DataFrame(data=RunData, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day',
                                                'Previous close', 'Change', 'Change percent', 'Entered', 'Company', 'Sector'])
-    df2['Change percent'] = df2['Change percent'].str.replace('%', '').astype(float)
+    df2['Change percent'] = df2['Change percent'].replace('%', '').astype(float)
     # fig = px.scatter(df, x="Price", y='Change', size="Change percent", color="Symbol", hover_name="Symbol", size_max=60)
     positiveCount = len(df2[df2['Change percent'] > 0])
     negativeCount = len(df2[df2['Change percent'] < 0])
