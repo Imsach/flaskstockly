@@ -1,9 +1,9 @@
 {% extends "base2.html" %}
 {% block content %}
 <title>FlaskStockly</title>
-<meta http-equiv="refresh" content="{% if enableRefresh %}25{% else %}600{% endif %}; URL=/view">
+<meta http-equiv="refresh" content="{% if enableRefresh %}60{% else %}600{% endif %}; URL=/view">
 <div id="loading2"><h1 style="text-align:center; margin-top: 100px">Loading...</h1></div>
-<div id="loading3"><h2 style="text-align:center">Hang on tight! click on view dashboard if it's loading forever...</h2></div>
+<div id="loading3"><h2 style="text-align:center">Hang on tight! click on refresh if it's loading forever...</h2></div>
 <div>
   {% if isApiDemo %}
     <center><h3>__Api key is set to 'demo'; App may not work as expected__</h3></center>
@@ -17,12 +17,17 @@
   <input id="txt" name="addstock" type="text" maxlength="5" size="7" >
   <button id="add-stock" type="button">=Add Stock=</button>
   <button id="view-stock" type="button" title="View Stock News, Institution Holders, Charts, etc.">=$tock dashboard=</button>
+  
   <center>
     <form method="post" action="/run" style="display:inline-block;">
     <label style="display:inline-block;"><input type="checkbox" name="lists" value="SPY500"> SPY500</label>
     <label style="display:inline-block;"><input type="checkbox" name="lists" value="SPY600"> SPY Small 600</label>
     <label style="display:inline-block;"><input type="checkbox" name="lists" value="Rus1000"> Rus1000</label>
-    <input type="submit" title="Check one or all three boxes :) grab coffee! It'll take a while" value="Run">
+    <label style="display:inline-block;"><input type="checkbox" name="lists" value="Djia30"> Djia30</label>
+    <label style="display:inline-block;"><input type="checkbox" name="lists" value="Nasdaq100"> Nasdaq100</label>
+    <label style="display:inline-block;"><input type="checkbox" name="lists" value="Stocklist"> Stocklist </label>
+    <input type="submit" title="Check one or all boxes. Got list of Stocks?? add it to stocksList.txt file.
+    With free api we total_time = stocks * 12.5 seconds :) Grab coffee! It'll take a while" value="Run">
     </form> 
   </center></p></h4>
   <form method="post" name="autor" action="/changechart">
@@ -31,6 +36,7 @@
 <div id="chart" class="chart"></div>
 {% if positiveCount and negativeCount %}<center><h6>Stock market indexes Strong stocks: <span style="color: green;">{{ positiveCount }}</span> Weak stocks: <span style="color: red;">{{ negativeCount }}</span></h6></center>
 {% else %} {% endif %}
+{% if enableRefresh %}  <div style="text-align: right;"><h5><span id="timer">60</span> seconds to refresh</h5></div> {% else %} {% endif %}
 <form method="post" name="autor" action="/refresh">
   <input type="checkbox" name="enableRefresh" {% if enableRefresh %}checked{% endif %}>  
   <input type="submit" value="Auto-refresh" title="Click to turn on/off auto-refresh">
@@ -193,7 +199,18 @@
           $('#loading').hide();
           $('#loading2').hide();
           $('#loading3').hide();
-          }) 
+          })
       </script>
+
+<script>
+  {% if enableRefresh %}
+    var time = 60;
+    var timer = setInterval(function() {
+      time -= 1;
+      document.getElementById('timer').innerHTML = time;
+      if (time <= 0) clearInterval(timer);
+    }, 1000);
+  {% endif %}
+</script>
     {% endblock %}
 {% endblock %}

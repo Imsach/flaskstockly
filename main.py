@@ -145,6 +145,8 @@ def getStock(stock):
     df500 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
     df600 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_600_companies")
     df1000 = pd.read_html("https://en.wikipedia.org/wiki/Russell_1000_Index")
+    dfDjia30 = pd.read_html("https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average")
+    dfNasdaq100 = pd.read_html("https://en.wikipedia.org/wiki/Nasdaq-100")
     sp500 = df500[0]['Symbol'].values.tolist()
     security500Name = df500[0]['Security'].values.tolist()
     sp500Sector = df500[0]['GICS Sector'].values.tolist()
@@ -154,6 +156,12 @@ def getStock(stock):
     rus1000 = df1000[2]['Ticker'].values.tolist()
     rus1000Name = df1000[2]['Company'].values.tolist()
     rus1000Sector = df1000[2]['GICS Sector'].values.tolist()
+    djia30 = dfDjia30[1]['Symbol'].values.tolist()
+    djia30Name = dfDjia30[1]['Company'].values.tolist()
+    djia30Sector = dfDjia30[1]['Industry'].values.tolist()
+    nasdaq100 = dfNasdaq100[4]['Ticker'].values.tolist()
+    nasdaq100Name = dfNasdaq100[4]['Company'].values.tolist()
+    nasdaq100Sector = dfNasdaq100[4]['GICS Sector'].values.tolist()
 
     if stock in sp500:
         stock = sp500.index(stock)
@@ -167,6 +175,14 @@ def getStock(stock):
         stock = rus1000.index(stock)
         companyName = rus1000Name[stock]
         sector = rus1000Sector[stock]
+    elif stock in djia30:
+        stock = djia30.index(stock)
+        companyName = djia30Name[stock]
+        sector = djia30Sector[stock]
+    elif stock in nasdaq100:
+        stock = nasdaq100.index(stock)
+        companyName = nasdaq100Name[stock]
+        sector = nasdaq100Sector[stock]
     else:
         companyName = "NA"
         sector = "NA"
@@ -230,7 +246,7 @@ def hello_worldn():
         fig = px.bar(df, x="Symbol", y="Change percent", color="Sector", hover_name='Symbol', range_y=[df['Change percent'].min(), df['Change percent'].max()])
     else:
         fig = px.scatter(df, x="Price", y="Change percent", color="Sector", hover_name='Symbol', log_x=True, size_max=1500)
-    fig.update_layout(height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#3880cb")
+    fig.update_layout(height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#3880cb", hovermode='x')
     fig.update_xaxes(title_font_color="#3770ab", gridcolor='#202436')
     fig.update_yaxes(title_font_color="#3770ab", gridcolor='#202436')
 
@@ -239,7 +255,7 @@ def hello_worldn():
         fig2 = px.bar(df2, x="Symbol", y="Change percent", color="Sector", hover_name='Symbol', range_y=[df2['Change percent'].min(), df2['Change percent'].max()])
     else:
         fig2 = px.scatter(df2, x="Price", y="Change percent", color="Sector", hover_name='Symbol', log_x=True, size_max=1500)
-    fig2.update_layout(height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#3880cb")
+    fig2.update_layout(height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#3880cb", hovermode='x')
     fig2.update_xaxes(title_font_color="#3770ab", gridcolor='#202436')
     fig2.update_yaxes(title_font_color="#3770ab", gridcolor='#202436')
 
@@ -274,9 +290,13 @@ def runQuery():
         return redirect('/view')
 
 def backgroundRunQuery(stockLists, stockinfo=stockinfo):
+    global isBrQexecuted
+    isBrQexecuted = False
     df500 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
     df600 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_600_companies")
     df1000 = pd.read_html("https://en.wikipedia.org/wiki/Russell_1000_Index")
+    dfDjia30 = pd.read_html("https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average")
+    dfNasdaq100 = pd.read_html("https://en.wikipedia.org/wiki/Nasdaq-100")
     sp500 = df500[0]['Symbol'].values.tolist()
     security500Name = df500[0]['Security'].values.tolist()
     sp500Sector = df500[0]['GICS Sector'].values.tolist()
@@ -286,6 +306,18 @@ def backgroundRunQuery(stockLists, stockinfo=stockinfo):
     rus1000 = df1000[2]['Ticker'].values.tolist()
     rus1000Name = df1000[2]['Company'].values.tolist()
     rus1000Sector = df1000[2]['GICS Sector'].values.tolist()
+    djia30 = dfDjia30[1]['Symbol'].values.tolist()
+    djia30Name = dfDjia30[1]['Company'].values.tolist()
+    djia30Sector = dfDjia30[1]['Industry'].values.tolist()
+    nasdaq100 = dfNasdaq100[4]['Ticker'].values.tolist()
+    nasdaq100Name = dfNasdaq100[4]['Company'].values.tolist()
+    nasdaq100Sector = dfNasdaq100[4]['GICS Sector'].values.tolist()
+    if os.path.exists('stocksList.txt'):
+        with open('stocksList.txt', 'r') as s:
+            stockList = s.read()
+        stockListSymbols = stockList.split(",")
+        stockListSymbols = [symbol.strip() for symbol in stockListSymbols]
+
 
     allStocks = []
     for lst in stockLists:
@@ -295,6 +327,12 @@ def backgroundRunQuery(stockLists, stockinfo=stockinfo):
            allStocks.extend(sp600)
         elif lst == "Rus1000":
            allStocks.extend(rus1000)
+        elif lst == 'Djia30':
+            allStocks.extend(djia30)
+        elif lst == 'Stocklist':
+            allStocks.extend(stockListSymbols)
+        elif lst == 'Nasdaq100':
+            allStocks.extend(nasdaq100)
         else:
            allStocks.extend(lst)
     shuffle(allStocks)
@@ -330,17 +368,25 @@ def backgroundRunQuery(stockLists, stockinfo=stockinfo):
                         change = datas['Global Quote']['09. change']
                         change_percent = datas['Global Quote']['10. change percent']
                         if symbol in sp500:
-                            ids = sp500.index(symbol)
-                            companyName = security500Name[ids]
-                            sector = sp500Sector[ids]
+                            stock = sp500.index(symbol)
+                            companyName = security500Name[stock]
+                            sector = sp500Sector[stock]
                         elif symbol in sp600:
-                            ids = sp600.index(symbol)
-                            companyName = security600Name[ids]
-                            sector = sp600Sector[ids]
+                            stock = sp600.index(symbol)
+                            companyName = security600Name[stock]
+                            sector = sp600Sector[stock]
                         elif symbol in rus1000:
-                            ids = rus1000.index(symbol)
-                            companyName = rus1000Name[ids]
-                            sector = rus1000Sector[ids]
+                            stock = rus1000.index(symbol)
+                            companyName = rus1000Name[stock]
+                            sector = rus1000Sector[stock]
+                        elif symbol in djia30:
+                            stock = djia30.index(symbol)
+                            companyName = djia30Name[stock]
+                            sector = djia30Sector[stock]
+                        elif symbol in nasdaq100:
+                            stock = nasdaq100.index(symbol)
+                            companyName = nasdaq100Name[stock]
+                            sector = nasdaq100Sector[stock]
                         else:
                             companyName = "NA"
                             sector = "NA"
@@ -364,6 +410,9 @@ def backgroundRunQuery(stockLists, stockinfo=stockinfo):
             except:
                 continue
             count += 1
+        return redirect('/view')
+    return redirect('/view')
+    
     
 
 '''
