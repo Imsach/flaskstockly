@@ -23,7 +23,7 @@ Once the application is running, clicking on 'RUN' will start getting data from 
 
 Clicking on 'RUN' will slowly generate a searchable dataframe with functionalities such as sorting and filtering data:
 
-[![IMAGE ALT TEXT](screenshots/flaskStocklyHomePage.png)](http://www.youtube.com/watch?v=Axrrbg3YYGc "Experience the Power of FlaskStockly: The Ultimate Tool for Stock Analysis")
+[![IMAGE ALT TEXT](screenshots/flaskStocklyHomePage.png)](https://www.youtube.com/watch?v=kdHpTkjBbBw "Experience the Power of FlaskStockly: The Ultimate Tool for Stock Analysis")
 
 
 Enjoy!
