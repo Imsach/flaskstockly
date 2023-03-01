@@ -5,6 +5,9 @@
 <div id="loading2"><h1 style="text-align:center; margin-top: 100px">Loading...</h1></div>
 <div id="loading3"><h2 style="text-align:center">Hang on tight! click on refresh if it's loading forever...</h2></div>
 <div>
+  {% if isBrQexecuted %}
+  <h6 style="text-align:center; color: green;">Run query is working in background...</h6>
+  {% else %}{% endif %}
   {% if isApiDemo %}
     <center><h3>__Api key is set to 'demo'; App may not work as expected__</h3></center>
   {% else %}
@@ -27,14 +30,14 @@
     <label style="display:inline-block;"><input type="checkbox" name="lists" value="Nasdaq100"> Nasdaq100</label>
     <label style="display:inline-block;"><input type="checkbox" name="lists" value="Stocklist"> Stocklist </label>
     <input type="submit" title="Check one or all boxes. Got list of Stocks?? add it to stocksList.txt file.
-    With free api we total_time = stocks * 12.5 seconds :) Grab coffee! It'll take a while" value="Run">
+    With free API Total_time = stocks * 12.5 seconds :) Grab coffee! It'll take a while" value="Run">
     </form> 
   </center></p></h4>
   <form method="post" name="autor" action="/changechart">
     <input type="submit" value="Bar/Scatter" title="Choose your chart style">
   </form>
 <div id="chart" class="chart"></div>
-{% if positiveCount and negativeCount %}<center><h6>Stock market indexes Strong stocks: <span style="color: green;">{{ positiveCount }}</span> Weak stocks: <span style="color: red;">{{ negativeCount }}</span></h6></center>
+{% if positiveCount and negativeCount %}<center><h6>Stock market indexes Strong stocks: <span style="color: green;">{{ positiveCount }}</span> Weak stocks: <span style="color: red;"> {{ negativeCount }} </span> Neutral stocks: <span style="color: rgb(236, 243, 102);"> {{ noMoveCount }} </span></h6></center>
 {% else %} {% endif %}
 <form method="post" name="autor" action="/refresh">
   <input type="checkbox" name="enableRefresh" {% if enableRefresh %}checked{% endif %}>{% if enableRefresh %}<span id="timer">60</span> seconds to refresh {% else %} {% endif %}

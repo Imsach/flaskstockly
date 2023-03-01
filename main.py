@@ -230,7 +230,7 @@ stockinfo variable, DataFrame object df and ip address.
 
 @app.route('/view', methods=("POST", "GET"))
 def hello_worldn():
-    global enableRefresh, isChartStlBar
+    global enableRefresh, isChartStlBar, isBrQexecuted
     df = pd.DataFrame(data=stockinfo, columns=['Symbol', 'Open', 'High', 'Low', 'Price', 'Volume', 'Latest trading day',
                                                'Previous close', 'Change', 'Change percent', 'Entered', 'indexlist', 'Company', 'Sector'])
     df = (df.drop_duplicates(subset='Symbol', keep='last'))
@@ -252,6 +252,7 @@ def hello_worldn():
     # fig = px.scatter(df, x="Price", y='Change', size="Change percent", color="Symbol", hover_name="Symbol", size_max=60)
     positiveCount = len(df2[df2['Change percent'] > 0])
     negativeCount = len(df2[df2['Change percent'] < 0])
+    noMoveCount = len(df2[df2['Change percent'] == 0])
     
     if isChartStlBar:
         fig = px.bar(df, x="Symbol", y="Change percent", color="Sector", hover_name='Symbol', hover_data=['indexlist', 'Price'], range_y=[df['Change percent'].min(), df['Change percent'].max()])
@@ -275,7 +276,7 @@ def hello_worldn():
     return render_template('index2.html', column_names=df.columns.values, row_data=list(df.values.tolist()), column_names2=df2.columns.values, row_data2=list(df2.values.tolist()),
                             graphJSON=graphJSON, graphJSON2=graphJSON2, zip=zip,
                             stockinfo=stockinfo, df=df, ip=ip, isApiDemo=isApiDemo, RunData=RunData, enableRefresh=enableRefresh,
-                            positiveCount=positiveCount, negativeCount=negativeCount)
+                            positiveCount=positiveCount, negativeCount=negativeCount, noMoveCount=noMoveCount, isBrQexecuted=isBrQexecuted)
 
 '''
 This code is a route for the app that will run when the user visits the '/run' page. 
@@ -302,7 +303,7 @@ def runQuery():
 
 def backgroundRunQuery(stockLists, stockinfo=stockinfo):
     global isBrQexecuted
-    isBrQexecuted = False
+    
     
 
     if os.path.exists('stocksList.txt'):
@@ -412,6 +413,7 @@ def backgroundRunQuery(stockLists, stockinfo=stockinfo):
                     return redirect('/view')
             except:
                 continue
+            isBrQexecuted = False
             count += 1
         return redirect('/view')
     return redirect('/view')
