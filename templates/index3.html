@@ -2,8 +2,8 @@
 {% block content %}
     <title>Stock Data</title>
     <div id="loading2"><h1 style="text-align:center; margin-top: 100px">Hang on! It's Loading...</h1></div>
-    <div class="container">
-        <div>
+    <div class="container2">
+        <div class="top">
           {% if symbol %}
           <h5 style="text-align:center;">{{ symbol }}</h5>
           {% else %}
@@ -20,6 +20,13 @@
             <input type="date" id="edate" name="edate" value="">
             <input type="submit" value="Submit">
         </form></center></div>
+        <div class="gaugechart">
+          {% if chart_exists4 %}
+            <iframe src="{{ url_for('static', filename='gauge.html') }}" style="width: 100%; border: none; padding: 0;"></iframe>
+        {% else %}
+            <h6 style="text-align:right;">Gauge Chart will show here after you enter symbol.</h6>
+        {% endif %}
+        </div></div>
     <!-- <h2 style="text-align:center;">Volume/Price Chart</h2> -->
     <div class="chart-container">
     {% if chart_exists %}
@@ -39,6 +46,10 @@
         {% else %}
             <h6 style="text-align:center;">ATR Chart will show here after you enter symbol.</h6>
         {% endif %}
+        {% if symbol in stockInSqueeze %}
+        <h5 style="text-align:center;">{{ symbol }} is coming out of Squeeze!</h5>
+        {% else %} {% endif %}
+
     </div>
     <center><h3>Stock News</h3></center>
     <div class="tabley">
@@ -49,6 +60,8 @@
           <th>Title</th>
           <th>Publisher</th>
           <th>relatedTickers</th>
+          <th>Sentiment score</th>
+          <th>Overall Sentiment Score</th>
         </tr>
       </thead>
       <tbody>
@@ -61,6 +74,8 @@
             <a href="/stock_data?symbol={{ x.replace(' ', '') }}" target="_blank">{{ x }}</a>,
             {% endfor %}
           </td>
+          <td>{{ row[6] }}</td>
+          <td>{{ row[7] }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -191,6 +206,7 @@
           {% endfor %}
         </tbody>
       </table></div>
+      
     </div>
     {% block scripts %}
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

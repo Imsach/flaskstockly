@@ -37,7 +37,8 @@ from flask import jsonify
 import plotly.graph_objs as go
 import ta
 import threading
-
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
 
 
 
@@ -55,7 +56,9 @@ isApiDemo = False
 enableRefresh = False
 enableRefresh2 = False
 isChartStlBar = False
+stockInSqueeze = list()
 default_start_date = '2022-02-01'
+nltk.download('vader_lexicon')
 
 if secapi.api_key == 'demo':
     isApiDemo = True
@@ -66,11 +69,11 @@ if not os.path.exists("stock_data.db"):
     conn = sqlite3.connect('stock_data.db', check_same_thread=False)
     # Create the tables
     conn.execute("CREATE TABLE stock_data (Date TEXT, Open REAL, High REAL, Low REAL, Close REAL, Adj Close REAL, Volume INTEGER, symbol TEXT, Dividends REAL, Stock Splits REAL, Capital Gains REAL, Avg_volume REAL, Sma44 REAL, Sma200 REAL, Atr REAL)")
-    conn.execute("CREATE TABLE news_data (symbol TEXT, title TEXT, publisher TEXT, link TEXT, providerPublishTime TIMESTAMP, relatedTickers TEXT)")
+    conn.execute("CREATE TABLE news_data (symbol TEXT, title TEXT, publisher TEXT, link TEXT, providerPublishTime TIMESTAMP, relatedTickers TEXT, sentiment TEXT, overallscore float)")
     conn.execute("CREATE TABLE mutualfund_data (Holder TEXT, Shares REAL, Date Reported TIMESTAMP, '% Out' REAL, Value REAL)")
     conn.execute("CREATE TABLE majorholders_data (numbers TEXT, title TEXT, symbol TEXT)")
     conn.execute("CREATE TABLE stocksplits_data (Date TEXT, 'Stock Splits' REAL, symbol TEXT)")
-    conn.execute("CREATE TABLE run_data (Symbol TEXT, Price REAL, Open REAL, High REAL, Low REAL, Volume INTEGER, 'Latest trading day' TEXT, 'Previous close' REAL, Change REAL, 'Change percent' REAL, 'Entered' TEXT, 'Company' TEXT, 'Sector' TEXT)")
+    conn.execute("CREATE TABLE run_data (Symbol TEXT, Price REAL, Open REAL, High REAL, Low REAL, Volume INTEGER, 'Latest trading day' TEXT, 'Previous close' REAL, Change REAL, 'Change percent' REAL, 'Entered' TEXT, 'indexlist' TEXT, 'Company' TEXT, 'Sector' TEXT)")
     conn.commit()
     
 else:
@@ -106,6 +109,7 @@ def generateStocklist():
     df1000 = pd.read_html("https://en.wikipedia.org/wiki/Russell_1000_Index")
     dfDjia30 = pd.read_html("https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average")
     dfNasdaq100 = pd.read_html("https://en.wikipedia.org/wiki/Nasdaq-100")
+    df400 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_400_companies")
     sp500 = df500[0]['Symbol'].values.tolist()
     security500Name = df500[0]['Security'].values.tolist()
     sp500Sector = df500[0]['GICS Sector'].values.tolist()
@@ -121,7 +125,11 @@ def generateStocklist():
     nasdaq100 = dfNasdaq100[4]['Ticker'].values.tolist()
     nasdaq100Name = dfNasdaq100[4]['Company'].values.tolist()
     nasdaq100Sector = dfNasdaq100[4]['GICS Sector'].values.tolist()
-    return sp500, security500Name, sp500Sector, sp600, security600Name, sp600Sector, rus1000, rus1000Name, rus1000Sector, djia30, djia30Sector, djia30Name, nasdaq100, nasdaq100Sector, nasdaq100Name
+    spy400 = df400[0]['Ticker symbol'].values.tolist()
+    spy400Name = df400[0]['Security'].values.tolist()
+    spy400Sector = df400[0]['GICS Sector'].values.tolist()
+    return sp500, security500Name, sp500Sector, sp600, security600Name, sp600Sector, rus1000, rus1000Name, rus1000Sector, djia30, djia30Sector, djia30Name, nasdaq100, nasdaq100Sector, nasdaq100Name, spy400, spy400Name, spy400Sector
+
 
 @app.route('/', methods=("POST", "GET"))
 def welcomePage():
@@ -163,7 +171,7 @@ def getStock(stock):
     r = requests.get(url)
     data = r.json()
     t1 = time.strftime("%m/%d/%Y, %H:%M:%S", time.localtime())
-    sp500, security500Name, sp500Sector, sp600, security600Name, sp600Sector, rus1000, rus1000Name, rus1000Sector, djia30, djia30Sector, djia30Name, nasdaq100, nasdaq100Sector, nasdaq100Name = generateStocklist()
+    sp500, security500Name, sp500Sector, sp600, security600Name, sp600Sector, rus1000, rus1000Name, rus1000Sector, djia30, djia30Sector, djia30Name, nasdaq100, nasdaq100Sector, nasdaq100Name, spy400, spy400Name, spy400Sector = generateStocklist()
 
 
     
@@ -173,26 +181,36 @@ def getStock(stock):
         companyName = security500Name[stock]
         sector = sp500Sector[stock]
         indexlist = 'SPY500'
+
     elif stock in sp600:
         stock = sp600.index(stock)
         companyName = security600Name[stock]
         sector = sp600Sector[stock]
         indexlist = 'SPY600'
+
     elif stock in rus1000:
         stock = rus1000.index(stock)
         companyName = rus1000Name[stock]
         sector = rus1000Sector[stock]
         indexlist = 'Russell1000'
+
     elif stock in djia30:
         stock = djia30.index(stock)
         companyName = djia30Name[stock]
         sector = djia30Sector[stock]
         indexlist = 'DJIA30'
+
     elif stock in nasdaq100:
         stock = nasdaq100.index(stock)
         companyName = nasdaq100Name[stock]
         sector = nasdaq100Sector[stock]
         indexlist = 'NASDAQ100'
+
+    elif stock in spy400:
+        stock = spy400.index(stock)
+        companyName = spy400Name[stock]
+        sector = spy400Sector[stock]
+        indexlist = 'SPY400'
     else:
         companyName = "NA"
         sector = "NA"
@@ -292,7 +310,6 @@ Finally, it redirects the user to the '/view' page.
 def runQuery():
     global isBrQexecuted
     if not isBrQexecuted and request.method == 'POST':
-        stockLists = list()
         stockLists = request.form.getlist('lists')
         isBrQexecuted = True
         thread = threading.Thread(target=backgroundRunQuery, args=(stockLists,))
@@ -302,17 +319,15 @@ def runQuery():
         return redirect('/view')
 
 def backgroundRunQuery(stockLists, stockinfo=stockinfo):
-    global isBrQexecuted
-    
-    
+    global isBrQexecuted    
 
     if os.path.exists('stocksList.txt'):
         with open('stocksList.txt', 'r') as s:
-            stockList = s.read()
-        stockListSymbols = stockList.split(",")
+            stockListdata = s.read()
+        stockListSymbols = stockListdata.split(",")
         stockListSymbols = [symbol.strip() for symbol in stockListSymbols]
 
-    sp500, security500Name, sp500Sector, sp600, security600Name, sp600Sector, rus1000, rus1000Name, rus1000Sector, djia30, djia30Sector, djia30Name, nasdaq100, nasdaq100Sector, nasdaq100Name = generateStocklist()
+    sp500, security500Name, sp500Sector, sp600, security600Name, sp600Sector, rus1000, rus1000Name, rus1000Sector, djia30, djia30Sector, djia30Name, nasdaq100, nasdaq100Sector, nasdaq100Name, spy400, spy400Name, spy400Sector = generateStocklist()
     allStocks = []
     for lst in stockLists:
         if lst == "SPY500":
@@ -327,6 +342,8 @@ def backgroundRunQuery(stockLists, stockinfo=stockinfo):
             allStocks.extend(stockListSymbols)
         elif lst == 'Nasdaq100':
             allStocks.extend(nasdaq100)
+        elif lst == "SPY400":
+           allStocks.extend(spy400)
         else:
            allStocks.extend(lst)
     shuffle(allStocks)
@@ -341,14 +358,9 @@ def backgroundRunQuery(stockLists, stockinfo=stockinfo):
                     r = requests.get(url)
                     datas = r.json()
 
-                    df = pd.DataFrame(data=stockinfo,
-                                    columns=['Symbol', 'Price', 'Open', 'High', 'Low', 'Volume', 'Latest trading day',
-                                            'Previous close', 'Change', 'Change percent', 'Entered', 'indexlist', 'Company', 'Sector'])
                     
-                    df = (df.drop_duplicates(subset='Symbol', keep='last'))
-                    df['Change percent'] = df['Change percent'].str.replace('%', '').astype(float)
-                    df.to_sql('run_data', conn, if_exists='replace', index=False)
-                
+                    
+                    
                     if r.status_code == 200:
                         t1 = time.strftime("%m/%d/%Y, %H:%M:%S", time.localtime())
                         symbol = datas['Global Quote']['01. symbol']
@@ -366,36 +378,54 @@ def backgroundRunQuery(stockLists, stockinfo=stockinfo):
                             companyName = security500Name[stock]
                             sector = sp500Sector[stock]
                             indexlist = 'SPY500'
+
                         elif symbol in sp600:
                             stock = sp600.index(symbol)
                             companyName = security600Name[stock]
                             sector = sp600Sector[stock]
                             indexlist = 'SPY600'
+
                         elif symbol in rus1000:
                             stock = rus1000.index(symbol)
                             companyName = rus1000Name[stock]
                             sector = rus1000Sector[stock]
                             indexlist = 'Russell1000'
+
                         elif symbol in djia30:
                             stock = djia30.index(symbol)
                             companyName = djia30Name[stock]
                             sector = djia30Sector[stock]
                             indexlist = 'DJIA30'
+
                         elif symbol in nasdaq100:
                             stock = nasdaq100.index(symbol)
                             companyName = nasdaq100Name[stock]
                             sector = nasdaq100Sector[stock]
                             indexlist = 'NASDAQ100'
+
                         elif symbol in stockListSymbols:
                             stock = stockListSymbols.index(symbol)
-                            indexList = 'StockListSymbols'
+                            indexlist = 'StockList'
                             companyName = "NA"
                             sector = "NA"
+
+                        elif symbol in spy400:
+                            stock = spy400.index(symbol)
+                            companyName = spy400Name[stock]
+                            sector = spy400Sector[stock]
+                            indexlist = 'SPY400'
+                            
                         else:
                             companyName = "NA"
                             sector = "NA"
                             indexlist = "NA"
                         stockinfo.append([symbol, price, open_price, high, low, volume, latest_trading_day, previous_close, change, change_percent, t1, indexlist, companyName, sector])
+                        df = pd.DataFrame(data=stockinfo,
+                                    columns=['Symbol', 'Price', 'Open', 'High', 'Low', 'Volume', 'Latest trading day',
+                                            'Previous close', 'Change', 'Change percent', 'Entered', 'indexlist', 'Company', 'Sector'])
+                        df = (df.drop_duplicates(subset='Symbol', keep='last'))
+                        df['Change percent'] = df['Change percent'].str.replace('%', '').astype(float)                
+                        df.to_sql('run_data', conn, if_exists='replace', index=False)
                         sleepTime = 12.5
                         while sleepTime > 0:
                             print(f"Remaining sleep time: {sleepTime} seconds")
@@ -504,6 +534,7 @@ def hhh():
 image_HTML = 'static/volume_price.html'
 image_HTML2 = 'static/rsi.html'
 image_HTML3 = 'static/atr.html'
+image_HTML4 = 'static/gauge.html'
 if os.path.exists(image_HTML):
     try:
         os.remove(image_HTML)
@@ -540,8 +571,12 @@ def stock_data():
         data["Date"] = data["Date"].apply(lambda x: x.strftime('%Y-%m-%d'))
         data['Avg_volume'] = data['Volume'].rolling(window=14).mean()
         data["Rsi"] = ta.momentum.RSIIndicator(data["Close"]).rsi()
+        data["Sma20"] = ta.trend.sma_indicator(data["Close"], window=20, fillna=False)
         data["Sma44"] = ta.trend.sma_indicator(data["Close"], window=44, fillna=False)
         data["Sma200"] = ta.trend.sma_indicator(data["Close"], window=200, fillna=False)
+        data['Stddev'] = data['Close'].rolling(window=20).std()
+        data['Lower_band'] = data['Sma20'] - (2 * data['Stddev'])
+        data['Upper_band'] = data['Sma20'] + (2 * data['Stddev'])
         
         # Plot the data using Plotly
         # fig1 = go.Scatter(x=data['Date'], y=data['Volume'], mode='lines', opacity=0.3, name='Volume', line=dict(color='white'))
@@ -566,6 +601,7 @@ def stock_data():
         fig.write_html(image_HTML)
         fig_2 = go.Figure(data=[fig2, fig6, fig7, fig8], layout=layout2)
         fig_2.write_html(image_HTML2)
+
         try:
             atr = ta.volatility.AverageTrueRange(data["High"], data["Low"], data["Close"], window = 14, fillna=False)
             data["Atr"] = pd.Series(atr.average_true_range(), index=data.index[14:])
@@ -578,7 +614,18 @@ def stock_data():
             return str(errorMessage)
 
         # Adding data to the database
+        data['Lower_keltner'] = data['Sma20'] - (data['Atr'] * 1.5)
+        data['Upper_keltner'] = data['Sma20'] + (data['Atr'] * 1.5)
         data['symbol'] = stock.ticker
+        def in_squeeze(data):
+            return data['Lower_band'] > data['Lower_keltner'] and data['Upper_band'] < data['Upper_keltner']
+        data['squeeze_on'] = data.apply(in_squeeze, axis=1)
+        if data.iloc[-3]['squeeze_on'] and not data.iloc[-1]['squeeze_on']:
+            print("{} is coming out the squeeze".format(symbol))
+            if symbol == None or symbol == ['']:
+                pass
+            else:
+                stockInSqueeze.append(symbol)
         print(data)
         data.to_sql('stock_data', conn, if_exists='replace', index=False)
         news = stock.get_news()
@@ -588,7 +635,91 @@ def stock_data():
         news_df["providerPublishTime"] = news_df["providerPublishTime"].apply(lambda x: x.strftime('%Y-%m-%d'))
         news_df['relatedTickers'] = news_df['relatedTickers'].apply(lambda x: ",".join(x) if isinstance(x, (list, tuple)) else x)
         news_df['symbol'] = stock.ticker
+        overallscore = 0
+        validcount = 0
+        for i, row in news_df.iterrows():
+            link = row['link']
+            response = requests.get(link)
+            print(response)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.content, 'html.parser')
+                body = soup.find('body')
+                body_text = body.get_text()
+                # sentiment = textblob.TextBlob(body_text).sentiment.polarity
+                senti = SentimentIntensityAnalyzer()
+                sentimentAnalysis = senti.polarity_scores(body_text)
+                sentiment = sentimentAnalysis['compound']
+                if sentiment > 0:
+                    news_df.at[i,'sentiment'] = 'Positive score:' + str(round(sentiment * 100))
+                    overallscore += sentiment
+                    validcount += 1
+                elif sentiment < 0:
+                    news_df.at[i,'sentiment'] = 'Negative score:' + str(round(sentiment * 100))
+                    overallscore += sentiment
+                    validcount += 1
+                else:
+                    news_df.at[i,'sentiment'] = 'Neutral score:' + str(sentiment)
+            else:
+                pass
+        if validcount > 0:
+            overallscore = round((overallscore / validcount) * 100)
+        else:
+            overallscore = 0
+        news_df['overallscore'] = overallscore
         news_df.to_sql('news_data', conn, if_exists='replace', index=False)
+        
+        # Define gauge indicator layout
+        gauge_layout = go.Layout(
+            title='NEWS Sentiment',
+            font=dict(color='white', size=8),
+            template='plotly_dark',
+            margin=dict(l=5, r=10, b=10, t=30),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            # annotations=[{
+            #     'text': 'Sentiment score',
+            #     'font': {'size': 12, 'color': 'grey'},
+            #     'xref': 'paper',
+            #     'yref': 'paper',
+            #     'x': 0.20,
+            #     'y': 0.85
+            # }]
+        )
+
+        # Define gauge indicator data
+        gauge_data = go.Indicator(
+            mode='gauge+number',
+            value=news_df['overallscore'].iloc[-1],
+            gauge=dict(
+                axis=dict(
+                    range=[None, 100],
+                    tickmode='linear',
+                    tick0=0,
+                    dtick=20,
+                    ticks='outside',
+                    tickcolor='white',
+                    ticklen=10
+                ),
+                bar=dict(
+                    color='black',
+                    thickness=0.4
+                ),
+                bgcolor='#333333',
+                borderwidth=0.5,
+                steps=[
+                    {'range': [0, 50], 'color': 'red'},
+                    {'range': [50, 75], 'color': 'orange'},
+                    {'range': [75, 100], 'color': 'green'}
+                ],
+            )
+        )
+
+        # Create the figure with gauge indicator
+        fig_gauge = go.Figure(data=gauge_data, layout=gauge_layout)
+
+        # Write the figure to HTML file
+        fig_gauge.write_html(image_HTML4, config=dict(displayModeBar=False), full_html=False)
+
         queryNews += f" WHERE symbol='{symbol}'"
         queryMutualfund += f" WHERE symbol='{symbol}'"
         mutualfund = stock.get_mutualfund_holders()
@@ -619,6 +750,7 @@ def stock_data():
     chart_exists = os.path.exists('static/volume_price.html')
     chart_exists2 = os.path.exists('static/rsi.html')
     chart_exists3 = os.path.exists('static/Atr.html')
+    chart_exists4 = os.path.exists('static/gauge.html')
     cursor = conn.execute(query)
     cursorNews = conn.execute(queryNews)
     cursorMutualfund = conn.execute(queryMutualfund)
@@ -635,7 +767,7 @@ def stock_data():
     cursorRun = conn.execute(queryRun)
     RunData = cursorRun.fetchall()
     conn.close()
-    return render_template("index3.html", data=data, newsData=newsData, mutualfundData=mutualfundData, majorHolders=majorHolders, stockSplits=stockSplits, symbol=symbol, chart_exists=chart_exists, chart_exists2=chart_exists2, chart_exists3=chart_exists3, default_start_date=default_start_date, RunData=RunData)
+    return render_template("index3.html", data=data, newsData=newsData, mutualfundData=mutualfundData, majorHolders=majorHolders, stockSplits=stockSplits, symbol=symbol, chart_exists=chart_exists, chart_exists2=chart_exists2, chart_exists3=chart_exists3, chart_exists4=chart_exists4, default_start_date=default_start_date, RunData=RunData, stockInSqueeze=stockInSqueeze)
 
 
 '''
