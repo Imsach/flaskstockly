@@ -125,7 +125,7 @@ def generateStocklist():
     nasdaq100 = dfNasdaq100[4]['Ticker'].values.tolist()
     nasdaq100Name = dfNasdaq100[4]['Company'].values.tolist()
     nasdaq100Sector = dfNasdaq100[4]['GICS Sector'].values.tolist()
-    spy400 = df400[0]['Ticker symbol'].values.tolist()
+    spy400 = df400[0]['Symbol'].values.tolist()
     spy400Name = df400[0]['Security'].values.tolist()
     spy400Sector = df400[0]['GICS Sector'].values.tolist()
     return sp500, security500Name, sp500Sector, sp600, security600Name, sp600Sector, rus1000, rus1000Name, rus1000Sector, djia30, djia30Sector, djia30Name, nasdaq100, nasdaq100Sector, nasdaq100Name, spy400, spy400Name, spy400Sector
