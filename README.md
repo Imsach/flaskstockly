@@ -1,10 +1,10 @@
 # Flaskstockly
 
-Flaskstockly is a Flask web application that allows users to enter a stock symbol or run script (grab indexes) and retrieve information about the stock using the AlphaVantage API and yfinance library. The application also uses SQLite for storing the stock data, allowing for persistent data even after the application is closed. Pandas and Plotly are used for data handling and visualization, and the application has several routes that perform various tasks, such as displaying stock information, creating Plotly graphs, and continuously updating the stock data. Additionally, web scraping is used to provide trend information, which is displayed on a trend page with a Plotly graph.
+Flaskstockly is a Flask web application designed to provide users with stock information and analysis capabilities. It leverages the AlphaVantage API and the yfinance library to retrieve stock data and supports functionalities such as stock symbol lookup and index grabbing. The application utilizes SQLite to store stock data persistently, ensuring data availability even after the application is closed. Data handling and visualization are powered by Pandas and Plotly, and Flaskstockly offers several routes for tasks like displaying stock information, generating Plotly graphs, and maintaining up-to-date stock data. Additionally, the application employs web scraping to offer trend insights, presenting them alongside Plotly graphs.
 
 # Installation
 
-Before running the application, make sure to replace the 'API Key' in the Secapi.py file with your own free API from AlphaVantage or 'demo'. To install the required dependencies, open a command prompt and run the following command:
+Before running the application, you must obtain a free API key from AlphaVantage and replace the placeholder 'API Key' in the Secapi.py file with your own key. If you don't have an API key yet, you can use 'demo' for testing purposes. To install the necessary dependencies, open a command prompt and execute the following command:
 
 ```bash
 python -m pip install -r requirements.txt
@@ -16,14 +16,16 @@ To start the application, run the following command:
 python main.py
 ```
 
-Once the application is running, clicking on 'RUN' will start getting data from the API. Clicking on '$tock/Trend Dashboard' or 'Refresh' will show stocks data if any has been gathered. If no data is shown, click on 'RUN' again.
-
+Once the application is up and running, clicking on the 'RUN' button will initiate data retrieval from the API. Selecting '$tock/Trend Dashboard' or clicking 'Refresh' will display any accumulated stock data. In case no data is visible, simply click 'RUN' again.
 
 # Usage
 
-Clicking on 'RUN' will slowly generate a searchable dataframe with functionalities such as sorting and filtering data:
+Clicking the 'RUN' button gradually generates a searchable dataframe enriched with sorting and filtering capabilities:
 
 [![IMAGE ALT TEXT](screenshots/flaskStocklyHomePage.png)](https://www.youtube.com/watch?v=kdHpTkjBbBw "Experience the Power of FlaskStockly: The Ultimate Tool for Stock Analysis")
 
+Please note that the free AlphaVantage API imposes a limitation of 5 requests per minute. Ensure your usage aligns with this constraint to prevent disruptions in data retrieval. Enjoy exploring Flaskstockly's features and conducting insightful stock analyses!
 
-Enjoy!
+# Note
+
+If you're planning to use your own free API key from AlphaVantage, remember to update the 'API Key' in the Secapi.py file as mentioned in the installation steps (Use 'demo' as API Key to try out some fuctions of App)
