@@ -3,7 +3,7 @@
 {% block content %}
   <div class="container">
     <h4><p style="text-align:center">
-      <!-- <button id="trending-stocks" type="button">Trending Stocks</button> -->
+
       <button id="view-dashboard" type="button">Refresh</button>
       <input id="txt" name="addstock" type="text" maxlength="5" size="7" >
       <button id="add-stock" type="button">=Add Stock=</button>
@@ -91,16 +91,12 @@
       })
     </script>
   <script>
-    const trendingStocksButton = document.getElementById("trending-stocks");
     const viewDashboardButton = document.getElementById("view-dashboard");
     const addStockButton = document.getElementById("add-stock");
     const viewStockButton = document.getElementById("view-stock");
     const input = document.getElementById("txt");
     const adminButton = document.getElementById("admin");
-    trendingStocksButton.addEventListener("click", function() {
-      window.location.href = "/run2";
-      $('#loading2').show();
-    });
+
   
     viewDashboardButton.addEventListener("click", function() {
       window.location.href = "/view";
