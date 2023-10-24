@@ -1,0 +1,63 @@
+{% extends "base2.html" %}
+{% block content %}
+<title>FlaskStockly Admin</title>
+<meta http-equiv="refresh" content="20; URL=/view">
+
+    <h4><p style="text-align:center">
+      <button id="view-dashboard" type="button">Refresh</button>
+      <input id="txt" name="addstock" type="text" maxlength="5" size="7" >
+      <button id="add-stock" type="button">=Add Stock=</button>
+    
+    <center>
+        <form method="post" action="/rebuild" style="display:inline-block;">
+        <label style="display:inline-block;"><input type="checkbox" name="lists" value="SPY500"> S&P 500 </label>
+        <label style="display:inline-block;"><input type="checkbox" name="lists" value="SPY600"> S&P SmallCap 600 </label>
+        <label style="display:inline-block;"><input type="checkbox" name="lists" value="Rus1000"> Russell 1000 </label>
+        <label style="display:inline-block;"><input type="checkbox" name="lists" value="Djia30"> Djia 30 </label>
+        <label style="display:inline-block;"><input type="checkbox" name="lists" value="Nasdaq100"> Nasdaq 100 </label>
+        <label style="display:inline-block;"><input type="checkbox" name="lists" value="SPY400"> SPY MidCap 400</label>
+        <label style="display:inline-block;"><input type="checkbox" name="lists" value="Stocklist"> StockList </label>
+        <input type="submit" title="Check one or all boxes. Got list of Stocks?? add it to stocksList.txt file.
+        With Polygon API Total_time = stocks * 3 seconds :) Grab coffee! It'll take a while" value="Grab & Rebuild StockData">
+        </form> 
+    </center>
+    <br>
+    <center>
+      <form method="post" action="/stock_calc" style="display:inline-block;">
+      <label style="display:inline-block;"><input type="checkbox" name="lists" value="SPY500"> S&P 500 </label>
+      <label style="display:inline-block;"><input type="checkbox" name="lists" value="SPY600"> S&P SmallCap 600 </label>
+      <label style="display:inline-block;"><input type="checkbox" name="lists" value="Rus1000"> Russell 1000 </label>
+      <label style="display:inline-block;"><input type="checkbox" name="lists" value="Djia30"> Djia 30 </label>
+      <label style="display:inline-block;"><input type="checkbox" name="lists" value="Nasdaq100"> Nasdaq 100 </label>
+      <label style="display:inline-block;"><input type="checkbox" name="lists" value="SPY400"> SPY MidCap 400</label>
+      <label style="display:inline-block;"><input type="checkbox" name="lists" value="Stocklist"> StockList </label>
+      <input type="submit" title="Check one or all boxes. Got list of Stocks?? add it to stocksList.txt file.
+      With Polygon API Total_time = stocks * 3 seconds :) Grab coffee! It'll take a while" value="Stocks Squeez checker">
+      </form> 
+  </center></p></h4>
+    
+    {% block scripts %}
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script>
+        $(window).on('load', function () {
+          $('#loading').hide();
+        }) 
+      </script>
+    <script>
+       
+        const addStockButton = document.getElementById("add-stock");
+        const input = document.getElementById("txt");
+
+      
+        input.addEventListener("keyup", function() {
+          this.value = this.value.toUpperCase();
+        });
+      
+        addStockButton.addEventListener("click", function() {
+          location.href = `http://{{ ip }}/${input.value}`;
+        });
+    </script>
+
+    {% endblock %}
+{% endblock %}

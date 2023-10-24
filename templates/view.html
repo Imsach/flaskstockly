@@ -1,0 +1,144 @@
+{% extends "base2.html" %}
+
+{% block content %}
+  <div class="container">
+    <h4><p style="text-align:center">
+      <button id="trending-stocks" type="button">Trending Stocks</button>
+      <button id="view-dashboard" type="button">Refresh</button>
+      <input id="txt" name="addstock" type="text" maxlength="5" size="7" >
+      <button id="add-stock" type="button">=Add Stock=</button>
+      <button id="view-stock" type="button" title="View Stock News, Institution Holders, Charts, etc.">=$tock dashboard=</button>
+      <button id="admin" type="button">Admin site</button>
+      </p></h4></div>
+  <div id="chart" class="chart"></div>
+{% if positiveCount and negativeCount %}<center><h6>Stock market indexes Strong stocks: <span style="color: green;">{{ positiveCount }}</span> Weak stocks: <span style="color: red;"> {{ negativeCount }} </span> Neutral stocks: <span style="color: rgb(236, 243, 102);"> {{ noMoveCount }} </span></h6></center>
+{% else %} {% endif %}
+{% if stockInSqueeze %}
+    <center>
+        <div class="header-text">Stocks coming out of Squeeze</div>
+        <div>
+            {% for stock in stockInSqueeze %}
+                <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge">{{ stock }}</a>
+            {% endfor %}
+        </div>
+    </center>
+{% else %}
+{% endif %}
+
+      <div class="tabley">  
+    <table class="table table-striped" id="stock-table">
+      <thead class="thead-dark">
+        <tr>
+          {% for col in column_names %}
+            <th>{{ col }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in data %}
+          <tr>
+            {% for col in column_names %}
+              {% if col == 'Symbol' %}
+                <td><a href="/stock_data?symbol={{ entry['Symbol'] }}" target="_blank">{{ entry['Symbol'] }}</a></td>
+              {% elif col == 'Change' and entry['Change']|float < 0.0 %}
+                <td style="background-color: rgb(205, 151, 151)">{{ entry['Change'] }}</td>
+              {% elif col == 'Change percent' and entry['Change percent']|float > 3.0 %}
+                <td style="background-color: #eff3f8">{{ entry['Change percent'] }}</td>
+              {% else %}
+                <td>{{ entry[col] }}</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <style>
+    .header-text {
+        font-size: 0.7rem;
+        /* font-weight: bold; */
+        color: #5b7189;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        border-bottom: 2px solid #670524;
+        padding-bottom: 5px;
+        display: inline-block;
+    }
+    .stock-badge {
+        display: inline-block;
+        padding: 3px 6px;
+        margin: 1px;
+        background-color: #007BFF;
+        color: white;
+        border-radius: 8px;
+        font-size: 0.75rem;
+    }
+</style>
+
+  {% block scripts %} 
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+<script type="text/javascript">$(document).ready(function(){$('table').DataTable({
+    "pageLength": 15,
+    order: [[6, 'desc']]
+});});</script>
+    <script>
+      $(window).on('load', function () {
+          $('#loading').hide();
+          $('#loading2').hide();
+          $('#loading3').hide();
+      })
+    </script>
+  <script>
+    const trendingStocksButton = document.getElementById("trending-stocks");
+    const viewDashboardButton = document.getElementById("view-dashboard");
+    const addStockButton = document.getElementById("add-stock");
+    const viewStockButton = document.getElementById("view-stock");
+    const input = document.getElementById("txt");
+    const adminButton = document.getElementById("admin");
+    trendingStocksButton.addEventListener("click", function() {
+      window.location.href = "/run2";
+      $('#loading2').show();
+    });
+  
+    viewDashboardButton.addEventListener("click", function() {
+      window.location.href = "/view";
+      $('#loading2').show();
+    });
+  
+    input.addEventListener("keyup", function() {
+      this.value = this.value.toUpperCase();
+    });
+  
+    addStockButton.addEventListener("click", function() {
+      location.href = `http://{{ ip }}:1234/${input.value}`;
+    });
+
+    adminButton.addEventListener("click", function() {
+      location.href = `http://{{ ip }}:1234/admin`;
+    });
+  
+    viewStockButton.addEventListener("click", function() {
+      location.href = `http://{{ ip }}:1234/stock_data?symbol=${input.value}`;
+    });
+</script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    {% if data %}
+    <script type="text/javascript">
+      var graphs = {{graphJSON | safe}};
+      Plotly.plot('chart',graphs,{});        
+  </script>
+  <script>
+    {% if enableRefresh %}
+      var time = 10;
+      var timer = setInterval(function() {
+        time -= 1;
+        document.getElementById('timer').innerHTML = time;
+        if (time <= 0) clearInterval(timer);
+      }, 1000);
+    {% endif %}
+  </script>
+  {% endif %}
+  {% endblock %}
+{% endblock %}

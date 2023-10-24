@@ -1,0 +1,243 @@
+{% extends "base2.html" %}
+{% block content %}
+    <title>Stock Data</title>
+    <div id="loading2"><h1 style="text-align:center; margin-top: 100px">Hang on! It's Loading...</h1></div>
+    <div class="container2">
+        <div class="top">
+          {% if symbol %}
+          <h5 style="text-align:center;">{{ symbol }}</h5>
+          {% else %}
+          <h5 style="text-align:center;">(o).(o)</h5>
+          {% endif %}
+          <center>
+          <h2>Stock Dashboard</h2>
+          <form action="/stock_data" name="chartform" method="get">
+            <label for="symbol">Enter Stock Symbol:</label>
+            <input type="text" id="symbol" name="symbol" onkeyup="this.value=this.value.toUpperCase();">
+            <label for="start_date">Chart starts from:</label>
+            <input type="date" id="sdate" name="sdate" value="">
+            <label for="start_date">Chart ends at:</label>
+            <input type="date" id="edate" name="edate" value="">
+            <input type="submit" value="Submit">
+        </form></center></div>
+        <div class="gaugechart">
+          {% if chart_exists4 %}
+            <iframe src="{{ url_for('static', filename='gauge.html') }}" style="width: 100%; border: none; padding: 0;"></iframe>
+        {% else %}
+            <h6 style="text-align:right;">Gauge Chart will show here after you enter symbol.</h6>
+        {% endif %}
+        </div></div>
+    <!-- <h2 style="text-align:center;">Volume/Price Chart</h2> -->
+    <div class="chart-container">
+    {% if chart_exists %}
+        <iframe src="{{ url_for('static', filename='volume_price.html') }}" style="width: 100%; height: 500px; border: 10px; padding: 0;"></iframe>
+    {% else %}
+        <h6 style="text-align:center;">Chart will show here after you enter symbol.</h6>
+    {% endif %}
+    <!-- <h2 style="text-align:center;">RSI Chart</h2> -->
+      {% if chart_exists2 %}
+          <iframe src="{{ url_for('static', filename='rsi.html') }}" style="width: 100%; height: 220px; border: none; padding: 0;"></iframe>
+      {% else %}
+          <h6 style="text-align:center;">RSI Chart will show here after you enter symbol.</h6>
+      {% endif %}
+    <!-- <h2 style="text-align:center;">ATR Chart</h2> -->
+        {% if chart_exists3 %}
+            <iframe src="{{ url_for('static', filename='Atr.html') }}" style="width: 100%; height: 220px; border: none; padding: 0;"></iframe>
+        {% else %}
+            <h6 style="text-align:center;">ATR Chart will show here after you enter symbol.</h6>
+        {% endif %}
+        {% if symbol in stockInSqueeze %}
+        <h5 style="text-align:center;">{{ symbol }} is coming out of Squeeze!</h5>
+        {% else %} {% endif %}
+
+    </div>
+    <center><h3>Stock News</h3></center>
+    <div class="tabley">
+    <table>
+      <thead>
+        <tr>
+          <th>PublishTime</th>
+          <th>Title</th>
+          <th>Publisher</th>
+          <th>relatedTickers</th>
+          <th>Sentiment score</th>
+          <th>Overall Sentiment Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in newsData %}
+        <tr>
+          <td>{{ row[3] }}</td>
+          <td><a href="{{ row[2] }}" target="_blank">{{ row[0]}}</a></td>
+          <td>{{ row[1] }}</td>
+          <td>{% for x in row[4].split(',') %}
+            <a href="/stock_data?symbol={{ x.replace(' ', '') }}" target="_blank">{{ x }}</a>,
+            {% endfor %}
+          </td>
+          <td>{{ row[6] }}</td>
+          <td>{{ row[7] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+    <br>
+    <div class="tabley">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Open</th>
+            <th>High</th>
+            <th>Low</th>
+            <th>Close</th>
+            <th>Volume</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in data %}
+          <tr>
+            <td>{{ (row[0]|float) }}</td>
+            <td>{{ (row[1]|float)|round(2) }}</td>
+            <td>{{ (row[2]|float)|round(2) }}</td>
+            <td>{{ (row[3]|float)|round(2) }}</td>
+            <td>{{ (row[4]|float)|round(2) }}</td>
+            <td>{{ (row[5]|float) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table></div>
+      <br>
+      <center><h3>Stock Mutualfund Holders</h3></center>
+      <div class="tabley">
+        <table>
+        <thead>
+          <tr>
+            <th>Date Reported</th>
+            <th>Holder</th>
+            <th>Shares</th>
+            <th>% Total Shares Held</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in mutualfundData %}
+          <tr>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table></div>
+      <br>
+      <center><h3>Stock Major Holders</h3></center>
+      <div class="tabley">
+        <table>
+        <thead>
+          <tr>
+            <th>Holder share</th>
+            <th>who holds?</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in majorHolders %}
+          <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table></div>
+      <br>
+      <center><h3>Stock Splits History</h3></center>
+      <div class="tabley">
+        <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Splits</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in stockSplits %}
+          <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table></div>
+
+      <center><h3>Indexes Stocks History</h3></center>
+      <div class="tabley">
+        <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Open</th>
+            <th>High</th>
+            <th>Low</th>
+            <th>Close</th>
+            <th>Volume</th>
+            <th>Avg. Volume</th>
+            <th>RSI</th>
+            <th>SMA20</th>
+            <th>SMA44</th>
+            <th>SMA200</th>
+            <th>StdDev</th>
+            <th>LowerBand</th>
+            <th>UpperBand</th>
+            <th>ATR</th>
+            <th>LowerKeltner</th>
+            <th>UpperKeltner</th>
+            <th>Ticker</th>
+            <th>Coming out of Squeeze ?</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in RunData %}
+          <tr>
+            <td>{{ row[0]}}</a></td>
+            <td>{{ row[1]|float|round(2) }}</td>
+            <td>{{ row[2]|float|round(2) }}</td>
+            <td>{{ row[3]|float|round(2) }}</td>
+            <td>{{ row[4]|float|round(2) }}</td>
+            <td>{{ row[5]|float|round(1) }}</td>
+            <td>{{ row[6]|float|round(1) }}</td>
+            <td>{{ row[7]|float|round(2)}}</td>
+            <td>{{ row[8]|float|round(2) }}</td>
+            <td>{{ row[9]|float|round(2) }}</td>
+            <td>{{ row[10]|float|round(2) }}</td>
+            <td>{{ row[11]|float|round(2) }}</td>
+            <td>{{ row[12]|float|round(2) }}</td>
+            <td>{{ row[13]|float|round(2) }}</td>
+            <td>{{ row[14]|float|round(2) }}</td>
+            <td>{{ row[15]|float|round(2) }}</td>
+            <td>{{ row[16]|float|round(2) }}</td>
+            <td><a href="/stock_data?symbol={{ row[17] }}" target="_blank"></a>{{ row[17] }}</a></td>
+            <td>{{ row[18] }}</td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table></div>
+      
+    </div>
+    {% block scripts %}
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+<script type="text/javascript">$(document).ready(function(){$('table').DataTable({
+    "pageLength": 5,
+    order: [[0, 'desc']]
+});});</script> 
+  <script>
+    $(window).on('load', function () {
+      $('#loading').hide();
+      $('#loading2').hide();
+    }) 
+  </script>
+    {% endblock %}
+{% endblock %}

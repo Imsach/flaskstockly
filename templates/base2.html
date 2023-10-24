@@ -1,42 +1,46 @@
-<!doctype html>
-<html>
-  <head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='main.css') }}">
-  </head>
-  <body>
-    <center><h3><a href="/">--FlaskStockly--</a></h3></center>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <title>FlaskStockly</title>
+</head>
+<body>
+    <header>
+        <center><h3><a href="/">FlaskStockly</a></h3></center>
+    </header>
     <div class="container">
-      <div id="loading">
-        <img id="loading-image" src="static\Rb.gif" alt="Loading..." />
-      </div>
+        <div id="loading">
+            <img id="loading-image" src="static\Rb.gif" alt="Loading...">
+        </div>
 
-        {% block content %}
-        
-        {% endblock %}
+        {% block content %}{% endblock %}
+
         <a href="#" id="topBtn">^ Top</a>
-        <div id="footer">
-          {% block footer %}
-                <p style="text-align:center"> &copy; Copyright 2023 by <a href="http://nudope.com/">Stonkplan</a>.</p>
-                 {% endblock %}
-           </div>
-      </div>
-  </body>
-  <script>
-    window.onscroll = function() {scrollFunction()};
-    
-    function scrollFunction() {
-      if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-        document.getElementById("topBtn").style.display = "block";
-      } else {
-        document.getElementById("topBtn").style.display = "none";
-      }
-    }
-    
-    document.getElementById("topBtn").addEventListener("click", function() {
-      document.body.scrollTop = 0;
-      document.documentElement.scrollTop = 0;
-    });
+        <footer>
+            {% block footer %}
+                <p style="text-align: center">&copy; Copyright 2023 by <a href="http://nudope.com/">Stonkplan</a>.</p>
+            {% endblock %}
+        </footer>
+    </div>
+    <script>
+        window.onscroll = function() {
+            scrollFunction();
+        };
+        
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                document.getElementById("topBtn").style.display = "block";
+            } else {
+                document.getElementById("topBtn").style.display = "none";
+            }
+        }
+        
+        document.getElementById("topBtn").addEventListener("click", function() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        });
     </script>
+</body>
 </html>
