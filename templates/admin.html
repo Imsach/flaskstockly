@@ -45,10 +45,14 @@
         }) 
       </script>
     <script>
-       
+        const viewDashboardButton = document.getElementById("view-dashboard");
         const addStockButton = document.getElementById("add-stock");
         const input = document.getElementById("txt");
 
+        viewDashboardButton.addEventListener("click", function() {
+        window.location.href = "/admin";
+        $('#loading2').show();
+        });
       
         input.addEventListener("keyup", function() {
           this.value = this.value.toUpperCase();

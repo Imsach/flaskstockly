@@ -59,7 +59,7 @@ Once the application is up and running, clicking on the 'RUN' button will initia
 
 For the Polygon API version:
 ```bash
-python -m poly.py
+python -m poly
 ```
 
 [![IMAGE ALT TEXT](screenshots/flaskStocklyHomePage.png)](https://www.youtube.com/watch?v=kdHpTkjBbBw "Experience the Power of FlaskStockly: The Ultimate Tool for Stock Analysis")

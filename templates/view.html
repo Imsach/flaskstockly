@@ -1,6 +1,14 @@
 {% extends "base2.html" %}
 
 {% block content %}
+<div class="ticker">
+    <div class="ticker-content">
+      {% for stock in multi_category_stocks %}
+        <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi-top">{{ stock }}</a>
+      {% endfor %}
+    </div>
+  </div></br>
+
   <div class="container">
     <h4><p style="text-align:center">
 
@@ -11,19 +19,359 @@
       <button id="admin" type="button">Admin site</button>
       </p></h4></div>
   <div id="chart" class="chart"></div>
-{% if positiveCount and negativeCount %}<center><h6>Stock market indexes Strong stocks: <span style="color: green;">{{ positiveCount }}</span> Weak stocks: <span style="color: red;"> {{ negativeCount }} </span> Neutral stocks: <span style="color: rgb(236, 243, 102);"> {{ noMoveCount }} </span></h6></center>
+<div>{% if positiveCount and negativeCount %}<center><h6>Stock market indexes Strong stocks: <span style="color: green;">{{ positiveCount }}</span> Weak stocks: <span style="color: red;"> {{ negativeCount }} </span> Neutral stocks: <span style="color: rgb(236, 243, 102);"> {{ noMoveCount }} </span></h6></center>
 {% else %} {% endif %}
+</div>
+<div class="stocks-container">
 {% if stockInSqueeze %}
-    <center>
+<div class="stock-category">
         <div class="header-text">Stocks coming out of Squeeze</div>
         <div>
-            {% for stock in stockInSqueeze %}
-                <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge">{{ stock }}</a>
-            {% endfor %}
+          {% for stock in stockInSqueeze %}
+          {% if loop.index <= 15 %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge">{{ stock }}</a>
+              {% endif %}
+          {% else %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi hidden-stock">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge hidden-stock">{{ stock }}</a>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      {% if stockInSqueeze|length > 15 %}
+          <a href="#" class="show-more">More</a>
+      {% endif %}
+      
         </div>
-    </center>
+      </div>
 {% else %}
 {% endif %}
+
+{% if oversold %}
+<div class="stock-category">
+        <div class="header-text">Stocks oversold</div>
+        <div>
+          {% for stock in oversold %}
+          {% if loop.index <= 15 %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge">{{ stock }}</a>
+              {% endif %}
+          {% else %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi hidden-stock">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge hidden-stock">{{ stock }}</a>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      {% if oversold|length > 15 %}
+          <a href="#" class="show-more">More</a>
+      {% endif %}
+      
+        </div>
+      </div>
+{% else %}
+{% endif %}
+
+
+{% if overbought %}
+<div class="stock-category">
+        <div class="header-text">Stocks overbought</div>
+        <div>
+          {% for stock in overbought %}
+          {% if loop.index <= 15 %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge">{{ stock }}</a>
+              {% endif %}
+          {% else %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi hidden-stock">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge hidden-stock">{{ stock }}</a>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      {% if overbought|length > 15 %}
+          <a href="#" class="show-more">More</a>
+      {% endif %}
+      
+        </div>
+      </div>
+{% else %}
+{% endif %}
+
+
+{% if highRelativeVolumeStocks %}
+<div class="stock-category">
+        <div class="header-text">Higher relative volume</div>
+        <div>
+          {% for stock in highRelativeVolumeStocks %}
+          {% if loop.index <= 15 %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge">{{ stock }}</a>
+              {% endif %}
+          {% else %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi hidden-stock">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge hidden-stock">{{ stock }}</a>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      {% if highRelativeVolumeStocks|length > 15 %}
+          <a href="#" class="show-more">More</a>
+      {% endif %}
+      
+        </div>
+      </div>
+{% else %}
+{% endif %}
+
+
+
+{% if crossAbove20MA %}
+<div class="stock-category">
+        <div class="header-text">Stocks crossing 20MA</div>
+        <div>
+          {% for stock in crossAbove20MA %}
+          {% if loop.index <= 15 %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge">{{ stock }}</a>
+              {% endif %}
+          {% else %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi hidden-stock">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge hidden-stock">{{ stock }}</a>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      {% if crossAbove20MA|length > 15 %}
+          <a href="#" class="show-more">More</a>
+      {% endif %}
+      
+        </div>
+</div>
+{% else %}
+{% endif %}
+
+{% if crossAbove44MA %}
+<div class="stock-category">
+        <div class="header-text">Stocks crossing 44MA</div>
+        <div>
+          {% for stock in crossAbove44MA %}
+          {% if loop.index <= 15 %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge">{{ stock }}</a>
+              {% endif %}
+          {% else %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi hidden-stock">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge hidden-stock">{{ stock }}</a>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      {% if crossAbove44MA|length > 15 %}
+          <a href="#" class="show-more">More</a>
+      {% endif %}
+      
+        </div>
+</div>
+{% else %}
+{% endif %}
+
+{% if crossAbove50MA %}
+<div class="stock-category">
+        <div class="header-text">Stocks crossing 50MA</div>
+        <div>
+          {% for stock in crossAbove50MA %}
+          {% if loop.index <= 15 %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge">{{ stock }}</a>
+              {% endif %}
+          {% else %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi hidden-stock">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge hidden-stock">{{ stock }}</a>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      {% if crossAbove50MA|length > 15 %}
+          <a href="#" class="show-more">More</a>
+      {% endif %}
+      
+        </div>
+      </div>
+{% else %}
+{% endif %}
+
+{% if crossBelow20MA %}
+<div class="stock-category">
+
+        <div class="header-text">Stocks below 20MA</div>
+        <div>
+          {% for stock in crossBelow20MA %}
+          {% if loop.index <= 15 %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge">{{ stock }}</a>
+              {% endif %}
+          {% else %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi hidden-stock">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge hidden-stock">{{ stock }}</a>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      {% if crossBelow20MA|length > 15 %}
+          <a href="#" class="show-more">More</a>
+      {% endif %}
+      
+        </div>
+      </div>
+{% else %}
+{% endif %}
+
+{% if crossBelow44MA %}
+<div class="stock-category">
+
+        <div class="header-text">Stocks below 44MA</div>
+        <div>
+          {% for stock in crossBelow44MA %}
+          {% if loop.index <= 15 %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge">{{ stock }}</a>
+              {% endif %}
+          {% else %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi hidden-stock">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge hidden-stock">{{ stock }}</a>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      {% if crossBelow44MA|length > 15 %}
+          <a href="#" class="show-more">More</a>
+      {% endif %}
+      
+        </div>
+      </div>
+{% else %}
+{% endif %}
+
+{% if crossBelow50MA %}
+<div class="stock-category">
+
+        <div class="header-text">Stocks below 50MA</div>
+        <div>
+          {% for stock in crossBelow50MA %}
+          {% if loop.index <= 15 %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge">{{ stock }}</a>
+              {% endif %}
+          {% else %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi hidden-stock">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge hidden-stock">{{ stock }}</a>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      {% if crossBelow50MA|length > 15 %}
+          <a href="#" class="show-more">More</a>
+      {% endif %}
+      
+        </div>
+      </div>
+{% else %}
+{% endif %}
+
+
+{% if cross20Ma50Ma %}
+<div class="stock-category">
+
+        <div class="header-text">Stocks 20MA crossing above 50MA</div>
+        <div>
+          {% for stock in cross20Ma50Ma %}
+          {% if loop.index <= 15 %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge">{{ stock }}</a>
+              {% endif %}
+          {% else %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi hidden-stock">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge hidden-stock">{{ stock }}</a>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      {% if cross20Ma50Ma|length > 15 %}
+          <a href="#" class="show-more">More</a>
+      {% endif %}
+      
+        </div>
+      </div>
+{% else %}
+{% endif %}
+
+
+{% if cross20MaBelow50Ma %}
+<div class="stock-category">
+
+        <div class="header-text">Stocks 20MA crossing below 50MA</div>
+        <div>
+          {% for stock in cross20MaBelow50Ma %}
+          {% if loop.index <= 15 %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge">{{ stock }}</a>
+              {% endif %}
+          {% else %}
+              {% if stock in multi_category_stocks %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge-multi hidden-stock">{{ stock }}</a>
+              {% else %}
+                  <a href="/stock_data?symbol={{ stock }}" target="_blank" class="stock-badge hidden-stock">{{ stock }}</a>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      {% if cross20MaBelow50Ma|length > 15 %}
+          <a href="#" class="show-more">More</a>
+      {% endif %}
+      
+        </div>
+      </div>
+{% else %}
+{% endif %}
+<div id="timer"></div>
+  </div>
+</br>
 
       <div class="tabley">  
     <table class="table table-striped" id="stock-table">
@@ -56,11 +404,10 @@
   <style>
     .header-text {
         font-size: 0.7rem;
-        /* font-weight: bold; */
-        color: #5b7189;
+        color: #75899d;
         margin-bottom: 10px;
         text-transform: uppercase;
-        border-bottom: 2px solid #670524;
+        border-bottom: 2px solid #851538;
         padding-bottom: 5px;
         display: inline-block;
     }
@@ -68,12 +415,92 @@
         display: inline-block;
         padding: 3px 6px;
         margin: 1px;
-        background-color: #007BFF;
+        /* background-color: #5B504F; */
+        background-color: #36454F;
         color: white;
         border-radius: 8px;
         font-size: 0.75rem;
     }
-</style>
+    .stocks-container {
+        display: flex;
+        flex-wrap: wrap; 
+        justify-content: space-between; 
+        gap: 20px;
+    }
+    .stock-category {
+        flex: 1; 
+        min-width: 200px; /* Minimum width for each category */
+    }
+
+    .stock-badge-multi {
+    background-color: #FF4500;
+    display: inline-block;
+    padding: 3px 6px;
+    margin: 1px;
+    color: white;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    }
+
+    .hidden-stock {
+    display: none;
+    }
+
+    .show-more {
+      background-color: #36454F;  
+      color: white;
+      padding: 3px 6px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      margin-left: 5px;
+      margin-top: 10px; 
+      display: inline-block; 
+      vertical-align: top; /* To vertically align it with the badges */
+      cursor: pointer;
+      text-decoration: none; /* Remove the underline */
+      transition: background-color 0.3s; /* Smooth transition for hover */
+    }
+
+    .show-more:hover {
+      background-color: #2a3b45; /* Slightly darker shade for hover effect */
+    }
+
+    .ticker {
+    width: 100%;
+    overflow: hidden;
+    background-color: #070707d5; 
+    position: fixed; /* to keep it at the top */
+    top: 0;
+    z-index: 1000; /* to ensure it stays above other content */
+    }
+
+    .ticker-content {
+    display: inline-block;
+    white-space: nowrap;
+    animation: ticker 30s linear infinite;
+    }
+
+    @keyframes ticker {
+    from {
+        transform: translateX(50%);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+    }
+
+    
+    .stock-badge-multi-top {
+    background-color: #FF4500;
+    display: inline-block;
+    padding: 3px 6px;
+    margin: 1px;
+    color: white;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    }
+    </style>
+    
 
   {% block scripts %} 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -125,15 +552,52 @@
       var graphs = {{graphJSON | safe}};
       Plotly.plot('chart',graphs,{});        
   </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      {% if enableRefresh %}
+        console.log('Timer is enabled');
+        var time = 60;
+        var timer = setInterval(function() {
+          time -= 1;
+          document.getElementById('timer').innerHTML = time;
+          if (time <= 0) {
+            clearInterval(timer);
+            location.reload();
+          }
+        }, 1000);
+      {% else %}
+        console.log('Timer is not enabled');
+      {% endif %}
+    });
+</script>
   <script>
-    {% if enableRefresh %}
-      var time = 10;
-      var timer = setInterval(function() {
-        time -= 1;
-        document.getElementById('timer').innerHTML = time;
-        if (time <= 0) clearInterval(timer);
-      }, 1000);
-    {% endif %}
+    document.addEventListener("DOMContentLoaded", function() {
+    const moreLinks = document.querySelectorAll('.show-more');
+    
+    moreLinks.forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+            const hiddenStocks = this.parentElement.querySelectorAll('.hidden-stock');
+            
+            hiddenStocks.forEach(stock => {
+                stock.style.display = 'inline-block';
+            });
+            
+            this.style.display = 'none';
+            });
+        });
+    });
+
+  </script>
+  <script>
+    document.querySelector('.ticker').addEventListener('mouseover', () => {
+    document.querySelector('.ticker-content').style.animationPlayState = 'paused';
+    });
+
+    document.querySelector('.ticker').addEventListener('mouseout', () => {
+    document.querySelector('.ticker-content').style.animationPlayState = 'running';
+    });
+
   </script>
   {% endif %}
   {% endblock %}

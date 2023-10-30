@@ -45,7 +45,7 @@
   <input type="submit" value="Auto-refresh" title="Click to turn on/off auto-refresh">
 </form>
   <div>
-    {% if stockinfo %}
+    {% if Data %}
   <div class="tabley">  
   <table>
     <thead>
@@ -180,11 +180,11 @@
     });
   
     addStockButton.addEventListener("click", function() {
-      location.href = `http://{{ ip }}/${input.value}`;
+      location.href = `http://{{ip}}/${input.value}`;
     });
   
     viewStockButton.addEventListener("click", function() {
-      location.href = `http://{{ ip }}/stock_data?symbol=${input.value}`;
+      location.href = `http://{{ip}}/stock_data?symbol=${input.value}`;
     });
 </script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>

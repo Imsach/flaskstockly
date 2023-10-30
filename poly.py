@@ -37,11 +37,26 @@ ip.connect(("8.8.8.8", 80))
 ip = ip.getsockname()[0]
 stockListSymbols = []
 stockInSqueeze = []
-
+crossAbove20MA = []
+crossAbove44MA = []
+crossAbove50MA = []
+crossAbove100MA = []
+crossAbove200MA = []
+crossBelow20MA = []
+crossBelow44MA = []
+crossBelow50MA = []
+crossBelow100MA = []
+crossBelow200MA = []
+cross20Ma50Ma = []
+cross20MaBelow50Ma = []
+oversold = []
+overbought = []
+highRelativeVolumeStocks = []
 image_HTML = 'static/volume_price.html'
 image_HTML2 = 'static/rsi.html'
 image_HTML3 = 'static/atr.html'
 image_HTML4 = 'static/gauge.html'
+
 if os.path.exists(image_HTML):
     try:
         os.remove(image_HTML)
@@ -116,7 +131,17 @@ def getStock(stock):
 
 @app.route('/view', methods=["POST", "GET"])
 def view_data():
-    global isChartStlBar, ip, stockInSqueeze, enableRefresh
+    global isChartStlBar, ip, stockInSqueeze, enableRefresh, cross20MaBelow50Ma, cross20Ma50Ma, crossAbove20MA, crossBelow20MA, crossAbove50MA, crossBelow50MA, oversold, overbought, highRelativeVolumeStocks
+    all_stock_lists = [stockInSqueeze, cross20MaBelow50Ma, cross20Ma50Ma, crossAbove20MA, crossBelow20MA, crossAbove50MA, crossBelow50MA, oversold, overbought, highRelativeVolumeStocks]
+    
+    multi_category_stocks = set()
+    for stock_list in all_stock_lists:
+        for stock in stock_list:
+            count = sum(stock in s_list for s_list in all_stock_lists)
+            if count > 1:
+                multi_category_stocks.add(stock)
+
+    
     queryRun = "SELECT * FROM stock_data"
     cursorRun = conn.execute(queryRun)
     stock_data = cursorRun.fetchall()
@@ -151,10 +176,15 @@ def view_data():
 
     # Convert DataFrame to a list of dictionaries
     data_dict_list = df.to_dict(orient='records')
-
+    stockInSqueeze = list(set(stockInSqueeze))
     column_names = df.columns.values.tolist()
 
-    return render_template('view.html', df=df, data=data_dict_list, column_names=column_names, graphJSON=graphJSON, positiveCount=positiveCount, negativeCount=negativeCount, noMoveCount=noMoveCount, ip=ip, stockInSqueeze=stockInSqueeze, enableRefresh=enableRefresh)
+    return render_template('view.html', df=df, data=data_dict_list, column_names=column_names, graphJSON=graphJSON,
+                            positiveCount=positiveCount, negativeCount=negativeCount, noMoveCount=noMoveCount, ip=ip,
+                            stockInSqueeze=stockInSqueeze, enableRefresh=enableRefresh, 
+                            cross20MaBelow50Ma = cross20MaBelow50Ma, cross20Ma50Ma = cross20Ma50Ma, crossAbove20MA = crossAbove20MA, crossAbove44MA = crossAbove44MA,
+                            crossBelow20MA = crossBelow20MA, crossBelow44MA = crossBelow44MA, crossAbove50MA = crossAbove50MA, crossBelow50MA = crossBelow50MA, multi_category_stocks = multi_category_stocks,
+                            oversold = oversold, overbought = overbought, highRelativeVolumeStocks = highRelativeVolumeStocks)
 
 @app.route('/rebuild', methods=["POST", "GET"])
 def rebuild_data():
@@ -459,6 +489,8 @@ def stock_datas():
 
 def stock_calc(stocks):
     proc_Stocks = []
+    global stockInSqueeze, cross20MaBelow50Ma, cross20Ma50Ma, crossAbove20MA, crossBelow20MA, crossAbove50MA, crossBelow50MA, crossAbove44MA, crossBelow44MA, overbought, oversold, highRelativeVolumeStocks
+
     
     while len(proc_Stocks) < len(stocks):
         for stock in stocks:
@@ -480,12 +512,97 @@ def stock_calc(stocks):
                     data["Date"] = data["Date"].apply(lambda x: x.strftime('%Y-%m-%d'))
                     data['Avg_volume'] = data['Volume'].rolling(window=14).mean()
                     data["Rsi"] = ta.momentum.RSIIndicator(data["Close"]).rsi()
+                    relative_volume = data.iloc[-1]['Volume'] / data.iloc[-1]['Avg_volume']
+                    
                     data["Sma20"] = ta.trend.sma_indicator(data["Close"], window=20, fillna=False)
                     data["Sma44"] = ta.trend.sma_indicator(data["Close"], window=44, fillna=False)
+                    data["Sma50"] = ta.trend.sma_indicator(data["Close"], window=50, fillna=False)
+                    data["Sma100"] = ta.trend.sma_indicator(data["Close"], window=100, fillna=False)
                     data["Sma200"] = ta.trend.sma_indicator(data["Close"], window=200, fillna=False)
+
                     data['Stddev'] = data['Close'].rolling(window=20).std()
                     data['Lower_band'] = data['Sma20'] - (2 * data['Stddev'])
                     data['Upper_band'] = data['Sma20'] + (2 * data['Stddev'])
+
+                    # Check if stock's price is crossing 20-day MA (Golden Cross)
+                    data['cross_20ma'] = (data['Close'] > data['Sma20']) & (data['Close'].shift(1) < data['Sma20'])
+
+                    # Check if stock's price is crossing 20-day MA (Death Cross)
+                    data['cross_below_20ma'] = (data['Close'] < data['Sma20']) & (data['Close'].shift(1) > data['Sma20'])
+
+                    # Check if stock's price is crossing 20-day MA (Golden Cross)
+                    data['cross_44ma'] = (data['Close'] > data['Sma44']) & (data['Close'].shift(1) < data['Sma44'])
+
+                    # Check if stock's price is crossing 20-day MA (Death Cross)
+                    data['cross_below_44ma'] = (data['Close'] < data['Sma44']) & (data['Close'].shift(1) > data['Sma44'])
+
+
+                    # Check if stock's price is crossing 50-day MA (Golden Cross)
+                    data['cross_50ma'] = (data['Close'] > data['Sma50']) & (data['Close'].shift(1) < data['Sma50'])
+
+                    # Check if stock's price is crossing 50-day MA (Death Cross)
+                    data['cross_below_50ma'] = (data['Close'] < data['Sma50']) & (data['Close'].shift(1) > data['Sma50'])
+
+                    # Check if 20-day MA is crossing 50-day MA (Golden Cross)
+                    data['20ma_cross_50ma'] = (data['Sma20'] > data['Sma50']) & (data['Sma20'].shift(1) < data['Sma50'])
+
+                    # Check if 20-day MA is crossing below 50-day MA (Death Cross)
+                    data['20ma_cross_below_50ma'] = (data['Sma20'] < data['Sma50']) & (data['Sma20'].shift(1) > data['Sma50'])
+
+                    if data.iloc[-1]['cross_20ma']:
+                        crossAbove20MA.append(stock)
+                        crossAbove20MA = list(set(crossAbove20MA))
+                        print("{}'s price is crossing above its 20-day MA".format(stock))
+                    elif data.iloc[-1]['cross_below_20ma']:
+                        crossBelow20MA.append(stock)
+                        crossBelow20MA = list(set(crossBelow20MA))
+                        print("{}'s price is crossing below its 20-day MA".format(stock))
+
+                    if data.iloc[-1]['cross_44ma']:
+                        crossAbove44MA.append(stock)
+                        crossAbove44MA = list(set(crossAbove44MA))
+                        print("{}'s price is crossing above its 44-day MA".format(stock))
+                    elif data.iloc[-1]['cross_below_44ma']:
+                        crossBelow44MA.append(stock)
+                        crossBelow44MA = list(set(crossBelow44MA))
+                        print("{}'s price is crossing below its 44-day MA".format(stock))
+
+                    if data.iloc[-1]['cross_50ma']:
+                        crossAbove50MA.append(stock)
+                        crossAbove50MA = list(set(crossAbove50MA))
+                        print("{}'s price is crossing above its 50-day MA".format(stock))
+                    elif data.iloc[-1]['cross_below_50ma']:
+                        crossBelow50MA.append(stock)
+                        crossBelow50MA = list(set(crossBelow50MA))
+                        print("{}'s price is crossing below its 50-day MA".format(stock))
+
+                    if data.iloc[-1]['20ma_cross_50ma']:
+                        cross20Ma50Ma.append(stock)
+                        cross20Ma50Ma = list(set(cross20Ma50Ma))
+                        print("{}'s 20-day MA is crossing above its 50-day MA".format(stock))
+                    elif data.iloc[-1]['20ma_cross_below_50ma']:
+                        cross20MaBelow50Ma.append(stock)
+                        cross20MaBelow50Ma = list(set(cross20MaBelow50Ma))
+                        print("{}'s 20-day MA is crossing below its 50-day MA".format(stock))
+
+                    # Check if RSI is less than 30 (Oversold)
+                    if data.iloc[-1]['Rsi'] < 30:
+                        oversold.append(stock)
+                        oversold = list(set(oversold))
+                        print("{} is oversold".format(stock))
+
+                    # Check if RSI is more than 70 (Overbought)
+                    elif data.iloc[-1]['Rsi'] > 70:
+                        overbought.append(stock)
+                        overbought = list(set(overbought))
+                        print("{} is overbought".format(stock))
+
+                    if relative_volume > 1.5:
+                        highRelativeVolumeStocks.append(stock)
+                        highRelativeVolumeStocks = list(set(highRelativeVolumeStocks))
+                        print("{} has high relative volume".format(stock))
+
+
 
                     try:
                         atr = ta.volatility.AverageTrueRange(data["High"], data["Low"], data["Close"], window=14, fillna=False)
@@ -566,20 +683,6 @@ def collect_data_for_batch(batch):
                 print(f'{symbol} : {latest_trading_day}')
 
                 save_data_to_db(stockinfo, symbol)
-
-                # df = pd.DataFrame(data=stockinfo, columns=['symbol', 'Price', 'open_price', 'High', 'Low', 'Volume',
-                #                                         'latest_trading_day', 'previous_close', 'Change',
-                #                                         'change_percent', 'indexlist', 'CompanyName', 'Sector'])
-                # df = df.drop_duplicates(subset='Symbol', keep='last')
-                # conn = create_connection('poly_stock_data.db')
-                # if conn is not None:
-                #     create_table(conn)  # Ensure the table exists
-                #     df.to_sql('stock_data', conn, if_exists='replace', index=False)
-                # else:
-                #     print("Error: Unable to create a database connection.")
-
-                # create_stock_table_if_not_exists(symbol)
-                # insert_stock_data(symbol, price, open_price, high, low, volume, latest_trading_day, previous_close, change, change_percent, indexlist, companyName, sector)
                 
         time.sleep(0.5)  # Sleep after processing each batch to respect the API rate limits
         
@@ -664,25 +767,6 @@ def save_data_to_db(stockinfo, symbol):
         conn.close()
     else:
         print("Error: Unable to create a database connection.")
-
-
-# def save_data_to_db(stockinfo, stock):
-#     df = pd.DataFrame(data=stockinfo, columns=['Symbol', 'open_price', 'High', 'Low', 'Price', 'Volume', 'latest_trading_day', 'previous_close', 'Change', 'change_percent', 'indexlist', 'companyName', 'Sector'])
-#     df = df.drop_duplicates(subset='Symbol', keep='last')
-
-#     conn = create_connection('poly_stock_data.db')
-#     if conn is not None:
-#         create_table(conn)  # Ensure the table exists
-#         df.to_sql('stock_data', conn, if_exists='append', index=False)
-
-#         # Assuming these functions are defined and used elsewhere in your code:
-#         create_stock_table_if_not_exists(stock)
-        
-#         # Extract relevant info from stockinfo using indices
-#         info = stockinfo[0]  # since stockinfo is a list of lists
-#         insert_stock_data(stock, info[1], info[2], info[3], info[4], info[5], info[6], info[7], info[8], info[9], info[10], info[11], info[12])
-#     else:
-#         print("Error: Unable to create a database connection.")
 
 
 def create_connection(db_file):
@@ -833,18 +917,8 @@ def create_stock_table_if_not_exists(symbol):
 def insert_stock_data(symbol, price, open_price, high, low, volume, latest_trading_day, previous_close, change, change_percent, indexlist, companyName, sector):
     table_name = f'stock_data_{symbol.replace(".", "_")}'  # Replace dots with underscores
 
-    # Check if 'price' column exists, and if not, add it
     columns = [col[1] for col in conn.execute(f"PRAGMA table_info({table_name})")]
-    # toCheck = ['price', 'open_price', 'latest_trading_day', 'previous_close', 'change', 'change_percent', 'indexlist', 'companyName', 'sector']
-    # queryText = ['price REAL', 'open_price REAL', 'latest_trading_day TIMESTAMP', 'previous_close REAL', 'change REAL', 'change_percent REAL', 'indexlist TEXT', 'companyName TEXT', 'sector TEXT']
-    # try:
-    #     for x, y in zip(toCheck, queryText):
-    #         if toCheck not in columns:
-    #             conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {queryText}")
-    #             conn.commit()
-    # except Exception as e:
-    #     print(e.args)
-    #     continue
+
     if "price" not in columns:
         conn.execute(f"ALTER TABLE {table_name} ADD COLUMN price REAL")
         conn.commit()
