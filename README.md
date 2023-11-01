@@ -62,7 +62,7 @@ For the Polygon API version:
 python -m poly
 ```
 
-[![IMAGE ALT TEXT](screenshots/flaskStocklyHomePage.png)](https://www.youtube.com/watch?v=kdHpTkjBbBw "Experience the Power of FlaskStockly: The Ultimate Tool for Stock Analysis")
+[![IMAGE ALT TEXT](screenshots/flaskstocklygif.gif)](https://www.youtube.com/watch?v=kdHpTkjBbBw "Experience the Power of FlaskStockly: The Ultimate Tool for Stock Analysis")
 
 Polygon API Usage: When utilizing the functionalities from poly.py, remember the potential rate limits and other restrictions when fetching data in bulk from the Polygon API.
 
