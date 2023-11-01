@@ -52,6 +52,11 @@ cross20MaBelow50Ma = []
 oversold = []
 overbought = []
 highRelativeVolumeStocks = []
+stocksUp = []
+stocksUpMulti = []
+stocksDown = []
+stocksDownMulti = []
+multiListStocks = []
 image_HTML = 'static/volume_price.html'
 image_HTML2 = 'static/rsi.html'
 image_HTML3 = 'static/atr.html'
@@ -131,7 +136,7 @@ def getStock(stock):
 
 @app.route('/view', methods=["POST", "GET"])
 def view_data():
-    global isChartStlBar, ip, stockInSqueeze, enableRefresh, cross20MaBelow50Ma, cross20Ma50Ma, crossAbove20MA, crossBelow20MA, crossAbove50MA, crossBelow50MA, oversold, overbought, highRelativeVolumeStocks
+    global isChartStlBar, ip, stockInSqueeze, enableRefresh, cross20MaBelow50Ma, cross20Ma50Ma, crossAbove20MA, crossBelow20MA, crossAbove50MA, crossBelow50MA, oversold, overbought, highRelativeVolumeStocks, stocksUp, stocksDown, stocksDownMulti, stocksUpMulti
     all_stock_lists = [stockInSqueeze, cross20MaBelow50Ma, cross20Ma50Ma, crossAbove20MA, crossBelow20MA, crossAbove50MA, crossBelow50MA, oversold, overbought, highRelativeVolumeStocks]
     
     multi_category_stocks = set()
@@ -141,7 +146,13 @@ def view_data():
             if count > 1:
                 multi_category_stocks.add(stock)
 
-    
+    stocksUpMulti = [stock for stock in multi_category_stocks if stock in stocksUp]
+    stocksDownMulti = [stock for stock in multi_category_stocks if stock in stocksDown]
+
+    multiListStocks = [{'symbol': stock, 'up': True} for stock in stocksUpMulti] + [{'symbol': stock, 'up': False} for stock in stocksDownMulti]
+
+    shuffle(multiListStocks)
+
     queryRun = "SELECT * FROM stock_data"
     cursorRun = conn.execute(queryRun)
     stock_data = cursorRun.fetchall()
@@ -183,8 +194,9 @@ def view_data():
                             positiveCount=positiveCount, negativeCount=negativeCount, noMoveCount=noMoveCount, ip=ip,
                             stockInSqueeze=stockInSqueeze, enableRefresh=enableRefresh, 
                             cross20MaBelow50Ma = cross20MaBelow50Ma, cross20Ma50Ma = cross20Ma50Ma, crossAbove20MA = crossAbove20MA, crossAbove44MA = crossAbove44MA,
-                            crossBelow20MA = crossBelow20MA, crossBelow44MA = crossBelow44MA, crossAbove50MA = crossAbove50MA, crossBelow50MA = crossBelow50MA, multi_category_stocks = multi_category_stocks,
-                            oversold = oversold, overbought = overbought, highRelativeVolumeStocks = highRelativeVolumeStocks)
+                            crossBelow20MA = crossBelow20MA, crossBelow44MA = crossBelow44MA, crossAbove50MA = crossAbove50MA, crossBelow50MA = crossBelow50MA, 
+                            multi_category_stocks = multi_category_stocks, oversold = oversold, overbought = overbought, highRelativeVolumeStocks = highRelativeVolumeStocks,
+                            stocksUpMulti=stocksUpMulti, stocksDownMulti=stocksDownMulti, stocksUp=stocksUp, stocksDown=stocksDown, multiListStocks = multiListStocks)
 
 @app.route('/rebuild', methods=["POST", "GET"])
 def rebuild_data():
@@ -489,7 +501,7 @@ def stock_datas():
 
 def stock_calc(stocks):
     proc_Stocks = []
-    global stockInSqueeze, cross20MaBelow50Ma, cross20Ma50Ma, crossAbove20MA, crossBelow20MA, crossAbove50MA, crossBelow50MA, crossAbove44MA, crossBelow44MA, overbought, oversold, highRelativeVolumeStocks
+    global stockInSqueeze, cross20MaBelow50Ma, cross20Ma50Ma, crossAbove20MA, crossBelow20MA, crossAbove50MA, crossBelow50MA, crossAbove44MA, crossBelow44MA, overbought, oversold, highRelativeVolumeStocks, stocksUp, stocksDown
 
     
     while len(proc_Stocks) < len(stocks):
@@ -585,14 +597,14 @@ def stock_calc(stocks):
                         cross20MaBelow50Ma = list(set(cross20MaBelow50Ma))
                         print("{}'s 20-day MA is crossing below its 50-day MA".format(stock))
 
-                    # Check if RSI is less than 30 (Oversold)
-                    if data.iloc[-1]['Rsi'] < 30:
+                    # Check if RSI is less than 25 (Oversold)
+                    if data.iloc[-1]['Rsi'] < 25:
                         oversold.append(stock)
                         oversold = list(set(oversold))
                         print("{} is oversold".format(stock))
 
-                    # Check if RSI is more than 70 (Overbought)
-                    elif data.iloc[-1]['Rsi'] > 70:
+                    # Check if RSI is more than 75 (Overbought)
+                    elif data.iloc[-1]['Rsi'] > 75:
                         overbought.append(stock)
                         overbought = list(set(overbought))
                         print("{} is overbought".format(stock))
@@ -601,6 +613,14 @@ def stock_calc(stocks):
                         highRelativeVolumeStocks.append(stock)
                         highRelativeVolumeStocks = list(set(highRelativeVolumeStocks))
                         print("{} has high relative volume".format(stock))
+
+                                        # Calculate if stock is up or down
+                    price_change = data.iloc[-1]['Close'] - data.iloc[-2]['Close']
+                    if price_change > 0:
+                        stocksUp.append(stock)
+                    elif price_change < 0:
+                        stocksDown.append(stock)
+
 
 
 
@@ -959,5 +979,5 @@ def insert_stock_data(symbol, price, open_price, high, low, volume, latest_tradi
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=1234)
+    app.run(debug=True, host='0.0.0.0', port=80)
 
