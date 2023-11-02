@@ -20,6 +20,7 @@ import datetime as dt
 import ta
 from bs4 import BeautifulSoup
 from nltk.sentiment import SentimentIntensityAnalyzer
+import numpy as np
 
 app = Flask(__name__)
 
@@ -57,6 +58,20 @@ stocksUpMulti = []
 stocksDown = []
 stocksDownMulti = []
 multiListStocks = []
+newHighs = []
+newLows = []
+breakRange = []
+breakoutRange = []
+breakdownRange = []
+breakoutDay = []
+breakdownDay = []
+trending = []
+downtrend = []
+gapUp = []
+gapDown = []
+recovering = []
+pullbacks = []
+
 image_HTML = 'static/volume_price.html'
 image_HTML2 = 'static/rsi.html'
 image_HTML3 = 'static/atr.html'
@@ -136,14 +151,14 @@ def getStock(stock):
 
 @app.route('/view', methods=["POST", "GET"])
 def view_data():
-    global isChartStlBar, ip, stockInSqueeze, enableRefresh, cross20MaBelow50Ma, cross20Ma50Ma, crossAbove20MA, crossBelow20MA, crossAbove50MA, crossBelow50MA, oversold, overbought, highRelativeVolumeStocks, stocksUp, stocksDown, stocksDownMulti, stocksUpMulti
-    all_stock_lists = [stockInSqueeze, cross20MaBelow50Ma, cross20Ma50Ma, crossAbove20MA, crossBelow20MA, crossAbove50MA, crossBelow50MA, oversold, overbought, highRelativeVolumeStocks]
+    global isChartStlBar, ip, stockInSqueeze, enableRefresh, cross20MaBelow50Ma, cross20Ma50Ma, crossAbove20MA, crossBelow20MA, crossAbove50MA, crossBelow50MA, oversold, overbought, highRelativeVolumeStocks, stocksUp, stocksDown, stocksDownMulti, stocksUpMulti, newHighs, newLows, breakdownRange, breakoutRange, breakdownDay, breakoutDay,  trending, downtrend, gapUp, gapDown, recovering, pullbacks
+    all_stock_lists = [stockInSqueeze, cross20MaBelow50Ma, cross20Ma50Ma, crossAbove20MA, crossBelow20MA, crossAbove50MA, crossBelow50MA, oversold, overbought, highRelativeVolumeStocks, newHighs, newLows, breakdownRange, breakoutRange, breakdownDay, breakoutDay, trending, downtrend, gapUp, gapDown, pullbacks, recovering]
     
     multi_category_stocks = set()
     for stock_list in all_stock_lists:
         for stock in stock_list:
             count = sum(stock in s_list for s_list in all_stock_lists)
-            if count > 1:
+            if count > 2:
                 multi_category_stocks.add(stock)
 
     stocksUpMulti = [stock for stock in multi_category_stocks if stock in stocksUp]
@@ -196,7 +211,10 @@ def view_data():
                             cross20MaBelow50Ma = cross20MaBelow50Ma, cross20Ma50Ma = cross20Ma50Ma, crossAbove20MA = crossAbove20MA, crossAbove44MA = crossAbove44MA,
                             crossBelow20MA = crossBelow20MA, crossBelow44MA = crossBelow44MA, crossAbove50MA = crossAbove50MA, crossBelow50MA = crossBelow50MA, 
                             multi_category_stocks = multi_category_stocks, oversold = oversold, overbought = overbought, highRelativeVolumeStocks = highRelativeVolumeStocks,
-                            stocksUpMulti=stocksUpMulti, stocksDownMulti=stocksDownMulti, stocksUp=stocksUp, stocksDown=stocksDown, multiListStocks = multiListStocks)
+                            stocksUpMulti=stocksUpMulti, stocksDownMulti=stocksDownMulti, stocksUp=stocksUp, stocksDown=stocksDown, multiListStocks = multiListStocks,
+                            newHighs = newHighs, newLows = newLows, breakdownRange = breakdownRange, breakoutRange = breakoutRange,
+                            breakdownDay = breakdownDay, breakoutDay = breakoutDay, trending = trending, downtrend = downtrend, gapUp = gapUp, gapDown = gapDown,
+                            recovering = recovering, pullbacks = pullbacks)
 
 @app.route('/rebuild', methods=["POST", "GET"])
 def rebuild_data():
@@ -501,7 +519,7 @@ def stock_datas():
 
 def stock_calc(stocks):
     proc_Stocks = []
-    global stockInSqueeze, cross20MaBelow50Ma, cross20Ma50Ma, crossAbove20MA, crossBelow20MA, crossAbove50MA, crossBelow50MA, crossAbove44MA, crossBelow44MA, overbought, oversold, highRelativeVolumeStocks, stocksUp, stocksDown
+    global stockInSqueeze, cross20MaBelow50Ma, cross20Ma50Ma, crossAbove20MA, crossBelow20MA, crossAbove50MA, crossBelow50MA, crossAbove44MA, crossBelow44MA, overbought, oversold, highRelativeVolumeStocks, stocksUp, stocksDown, newHighs, newLows, breakdownRange, breakoutRange, breakoutDay, trending, downtrend, gapUp, gapDown, recovering, pullbacks
 
     
     while len(proc_Stocks) < len(stocks):
@@ -597,6 +615,37 @@ def stock_calc(stocks):
                         cross20MaBelow50Ma = list(set(cross20MaBelow50Ma))
                         print("{}'s 20-day MA is crossing below its 50-day MA".format(stock))
 
+    
+                    breakRange = data.iloc[-14:]
+                    mean = breakRange['Close'].mean()
+                    std_dev14 = breakRange['Close'].std()
+
+                    # Breakout (14 days Range)
+                    if data.iloc[-1]['Close'] > mean + std_dev14:
+                        breakoutRange.append(stock)
+                        print("{} is breaking out of its 14-day range".format(stock))
+
+                    # Breakdown (Range)
+                    if data.iloc[-1]['Close'] < mean - std_dev14:
+                        breakdownRange.append(stock)
+                        print("{} is breaking down from its 14-day range".format(stock))
+
+                    # Previous day range
+                    previous_day = data.iloc[-2]
+                    std_dev = previous_day['Close'].std()
+
+                    # Breakout (Day)
+                    if data.iloc[-1]['Close'] > previous_day['Close'] + std_dev:
+                        breakoutDay.append(stock)
+                        print("{} is breaking out of its previous day range".format(stock))
+
+                    # Breakdown (Day)
+                    if data.iloc[-1]['Close'] < previous_day['Close'] - std_dev:
+                        breakdownDay.append(stock)
+                        print("{} is breaking down from its previous day range".format(stock))
+
+
+
                     # Check if RSI is less than 25 (Oversold)
                     if data.iloc[-1]['Rsi'] < 25:
                         oversold.append(stock)
@@ -621,6 +670,48 @@ def stock_calc(stocks):
                     elif price_change < 0:
                         stocksDown.append(stock)
 
+                    # New High
+                    if data.iloc[-1]['Close'] == data.iloc[-20:]['Close'].max():
+                        newHighs.append(stock)
+                        print("{} made a new high".format(stock))
+
+                    # New Low
+                    if data.iloc[-1]['Close'] == data.iloc[-20:]['Close'].min():
+                        newLows.append(stock)
+                        print("{} made a new low".format(stock))
+
+                    slope = np.polyfit(range(5), data.iloc[-5:]['Close'], 1)[0]
+
+                    # Trending
+                    if slope > 0:
+                        trending.append(stock)
+                        print("{} is trending higher over the last 5 days".format(stock))
+
+                    # Downtrend
+                    if slope < 0:
+                        downtrend.append(stock)
+                        print("{} is trending lower over the last 5 days".format(stock))
+
+
+                    # Gap Up
+                    if data.iloc[-1]['Open'] > data.iloc[-2]['High']:
+                        gapUp.append(stock)
+                        print("{} gapped up".format(stock))
+
+                    # Gap Down
+                    if data.iloc[-1]['Open'] < data.iloc[-2]['Low']:
+                        gapDown.append(stock)
+                        print("{} gapped down".format(stock))
+
+                    # Recovering
+                    if data.iloc[-1]['Close'] > data.iloc[-1]['Low'] and data.iloc[-1]['Low'] == data['Low'].min():
+                        recovering.append(stock)
+                        print("{} is recovering from a 52-week low".format(stock))
+
+                    # Pullbacks
+                    if data.iloc[-1]['Close'] < data.iloc[-1]['High'] and data.iloc[-1]['High'] == data['High'].max():
+                        pullbacks.append(stock)
+                        print("{} is pulling back from a 52-week high".format(stock))
 
 
 
@@ -725,7 +816,7 @@ def collect_data_for_batch(batch):
 
 def fetch_stock_data_from_polygon(stock):
     symbol = urllib.parse.quote(stock)
-    url = f'https://api.polygon.io/v3/snapshot?ticker.any_of={stock}&apiKey={secapi.poly_api_key}'
+    url = f'https://api.polygon.io/v3/snapshot?ticker.any_of={symbol}&apiKey={secapi.poly_api_key}'
     r = requests.get(url)
     return r.json().get('results', [{}])[0]
 

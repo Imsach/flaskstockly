@@ -236,3 +236,139 @@ a {
   text-decoration: none;
   text-transform: capitalize;
 }
+
+
+
+/* new */
+
+.header-text {
+  font-size: 0.7rem;
+  color: #75899d;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  border-bottom: 2px solid #851538;
+  padding-bottom: 5px;
+  display: inline-block;
+}
+.stock-badge {
+  display: inline-block;
+  padding: 3px 6px;
+  margin: 1px;
+  /* background-color: #5B504F; */
+  background-color: #171818;
+  color: #c0c0c0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  transition: 0.3s;
+}
+
+
+.stock-badge:hover {
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2); 
+}
+.stocks-container {
+  display: flex;
+  flex-wrap: wrap; 
+  justify-content: space-between; 
+  gap: 20px;
+}
+.stock-category {
+  flex: 1; 
+  min-width: 200px; /* Minimum width for each category */
+}
+
+.stock-badge-multi {
+  background-color: #073244;
+  display: inline-block;
+  padding: 3px 6px;
+  margin: 1px;
+  color: #c0c0c0;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  border: 1px solid #ccc; 
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); 
+  transition: 0.3s;
+}
+
+.stock-badge-multi:hover {
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2); 
+}
+
+.hidden-stock {
+display: none;
+}
+
+.show-more {
+background-color: #36454F;  
+color: white;
+padding: 3px 6px;
+border-radius: 8px;
+font-size: 0.75rem;
+margin-left: 5px;
+margin-top: 10px; 
+display: inline-block; 
+vertical-align: top; /* To vertically align it with the badges */
+cursor: pointer;
+text-decoration: none; /* Remove the underline */
+transition: background-color 0.3s; /* Smooth transition for hover */
+}
+
+.show-more:hover {
+background-color: #2a3b45; /* Slightly darker shade for hover effect */
+}
+
+.ticker {
+width: 100%;
+overflow: hidden;
+background-color: #070707d5; 
+position: fixed; /* to keep it at the top */
+top: 0;
+z-index: 1000; /* to ensure it stays above other content */
+}
+
+.ticker-content {
+display: inline-block;
+white-space: nowrap;
+animation: ticker 50s linear infinite;
+}
+
+@keyframes ticker {
+from {
+  transform: translateX(20%);
+}
+to {
+  transform: translateX(-100%);
+}
+}
+
+.stock-up-multi {
+color: #00C853;  /* Green for stocks that are up */
+display: inline-block;
+padding: 3px 6px;
+margin: 1px;
+border-radius: 8px;
+font-size: 0.85rem;
+}
+
+.stock-down-multi {
+color: #D32F2F;  /* Red for stocks that are down */
+display: inline-block;
+padding: 3px 6px;
+margin: 1px;
+border-radius: 8px;
+font-size: 0.85rem;
+}
+
+
+
+/* .stock-badge-multi-top {
+background-color: #FF4500;
+display: inline-block;
+padding: 3px 6px;
+margin: 1px;
+color: white;
+border-radius: 8px;
+font-size: 0.85rem;
+} */
