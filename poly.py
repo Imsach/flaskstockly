@@ -19,6 +19,7 @@ import yfinance as yf
 import datetime as dt
 import ta
 from bs4 import BeautifulSoup
+import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 import numpy as np
 
@@ -71,6 +72,7 @@ gapUp = []
 gapDown = []
 recovering = []
 pullbacks = []
+nltk.download('vader_lexicon')
 
 image_HTML = 'static/volume_price.html'
 image_HTML2 = 'static/rsi.html'
@@ -377,7 +379,7 @@ def stock_datas():
         news = stock.get_news()
         news_df = pd.DataFrame(news)
         news_df.drop(["uuid", "type", "thumbnail"], axis=1, inplace=True, errors='ignore')
-        news_df['providerPublishTime'] = pd.to_datetime(news_df['providerPublishTime'], unit='s')
+        news_df['providerPublishTime'] = pd.to_datetime(news_df['providerPublishTime'], unit='s', errors='ignore')
         news_df["providerPublishTime"] = news_df["providerPublishTime"].apply(lambda x: x.strftime('%Y-%m-%d'))
         news_df['relatedTickers'] = news_df['relatedTickers'].apply(lambda x: ",".join(x) if isinstance(x, (list, tuple)) else x)
         news_df['symbol'] = stock.ticker
@@ -473,8 +475,11 @@ def stock_datas():
         if not mutualfund_df.empty:
             mutualfund_df['symbol'] = stock.ticker
             mutualfund_df["Date Reported"] = mutualfund_df["Date Reported"].apply(lambda x: x.strftime('%Y-%m-%d'))
-            mutualfund_df["% Out"] = mutualfund_df["% Out"].apply(lambda x: 100 * float(x))
-            mutualfund_df["% Out"] = mutualfund_df["% Out"].apply(lambda x: "{:,.3f} %".format(x))
+            try:
+                mutualfund_df["% Out"] = mutualfund_df["% Out"].apply(lambda x: 100 * float(x))
+                mutualfund_df["% Out"] = mutualfund_df["% Out"].apply(lambda x: "{:,.3f} %".format(x))
+            except KeyError:
+                print("Column '% Out' not found. Skipping the operation.")
             mutualfund_df["Value"] = mutualfund_df["Value"].apply(lambda x: float(x) / 1000000)
             mutualfund_df["Value"] = mutualfund_df["Value"].apply(lambda x: "{:,.2f} million$".format(x))
             mutualfund_df.to_sql('mutualfund_data', conn, if_exists='replace', index=False)
